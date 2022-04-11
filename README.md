@@ -13,7 +13,7 @@ TODO: What will be the output of that task? Just document how to do it or some c
 ## CEX vs DEX Problems.
 TODO: Write down core problems with moving from centralized to decentralized exchanges like:
 - Orderbooks vs AAM
-- What if small order for 1$ will trigger a waterfall of other orders for 100000$, who will pay the gas fee?
+- If we will have an order book in DEX who will pay for gas? What if small order for 1$ will trigger a waterfall of other orders for 100000$, who will pay the gas fee?
 - Off-chain vs on-chain and game theory behind that in both cases in case of market makers
 - How arbitration of off-chain market makers will work in a decentralized world? Will it be worth competing from a game theory perspective?
 - Read more about matching algorithms on exchanges.
@@ -22,8 +22,6 @@ TODO: Write down core problems with moving from centralized to decentralized exc
 # Solutions.
 - TODO: Brief introduction of solutions for given problems.
 - TODO: What is Asset/Order data structure? What contracts are needed? Or how custom-made blockchain will look like?
-- TODO: Who will pay for gas? Clients of order or market makers?
-- TODO: If we have an order book 
 - TODO: Orders with a lump sum fee for all like in a centralized world (NYSE/Nasdaq/Binance) that the client needs to pay?
 - TODO: Competing market makers with a lump sum or dynamic fees?
 
