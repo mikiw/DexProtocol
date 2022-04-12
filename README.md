@@ -29,7 +29,6 @@ TODO: Write down core problems with moving from centralized to decentralized exc
 - Off-chain vs on-chain and game theory behind that in both cases in case of market makers
 - How arbitration of off-chain market makers will work in a decentralized world? Will it be worth competing from a game theory perspective?
 - Read more about matching algorithms on exchanges.
-- How to simulate these custom made blockchain/exchanges/makers behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)? 
 - vs decentralized like Uniswap, dYdX.
 - TODO: Read more about DeFi's, DEXs and AMMs and write down core concepts.
 
@@ -40,19 +39,39 @@ TODO: Write down core problems with moving from centralized to decentralized exc
 - TODO: Competing market makers with a lump sum or dynamic fees?
 
 ### Wyvern Protocol.
-- TODO: Brief introduction of Wyvern v3 on Ethereum (https://wyvernprotocol.com/ & https://wyvernprotocol.com/docs).
-- TODO: Read implementation https://github.com/wyvernprotocol/wyvern-v3/tree/master/contracts.
-- TODO: Check https://exchange.projectwyvern.com/.
 
-### Similar protocol to Wyvern.
-- TODO: Read more and write down core concepts about Etherdelta (https://github.com/etherdelta/smart_contract), 0x (https://github.com/0xProject/0x-monorepo), and Dexy (https://github.com/DexyProject/protocol)
+Wyvern (https://wyvernprotocol.com/ https://github.com/wyvernprotocol/wyvern-v3/tree/master/contracts) is the most advanced decentralized exchange protocol designed to transfer Ethereum-based assets. Now you can exchange your Tokens, Assets, and CryptoKitties in a trustless way on Wyvern Exchange (https://exchange.projectwyvern.com/ [Currently not working]) or OpenSea (https://opensea.io/)!
+
+Currently, Wyvern supports ERC-20 Tokens, ERC-1155 Multi Tokens, and ERC-721 NFTs so it's enough for now. In the future new standards will be added according to Wyvern DAO.
+
+Predicates in Wyvern are arbitrary and they can be any asset or combination of assets. Just try to swap AAPL and GOOGL from Nasdaq for VISA on NYSE, good luck with that!
+
+So how it works?
+
+Firstly users create orders with an order scheme (https://wyvernprotocol.com/docs#order-schema) and put them in the exchange registry and wait for a match and if so how much to fill it. Matching calldata can be constructed off-chain. Later, the first call is executed by the maker of the order through their proxy contract. The second call is executed by the counterparty.
+
+Orders must always be authorized by the maker address, who owns the proxy contract which will perform the call. Authorization can be done in three ways: by signed message, by pre-approval, and by match-time approval. To optimize this process we can use the order book off-chain and if there is a match we can emit on-chain authorization.
+
+In the end, a final order can be constructed and authorized by the maker of the order.
+
+Wyvern documentation also mentions a special case with Ethereum which can only be sent from an account by a transaction.
+
+The creators of the protocol don't mention too much about the matching algorithms and who will pay for its execution. We can only assume that sooner or later some application will be created to do so and people will run it locally to find a match for the orders. Also, maybe 3rd party paid services will be created to do so because they need to be incentivized somehow from a game theory perspective since they have no interest in doing it for free (or maybe it will be some charity project).
+
+Questions:
+- TODO: Is it true that ERC-20/ERC-721/ERC-1155 only?
+- TODO: ERC-1271 - what is that?
+- TODO: If I have 2 tokens on ERC-621 can I swap them in Wyvern?
+- TODO: What if self-destruct will be executed?)
 
 ### SmartWeave SDK v2
-- TODO: Read what is SmartWeave SDK v2 https://smartweave.docs.redstone.finance/.
+- TODO: Write down what is SmartWeave SDK v2 https://smartweave.docs.redstone.finance/.
 - TODO: Check codes https://github.com/ArweaveTeam/SmartWeave.
 - TODO: What is Redstone https://docs.google.com/document/d/1_5uagYbOklSEERt1ZvfVki01yC9sQt7Y5BBsisejHKM/edit.
+- TODO: Write down about proposed solution similar to Wyvern but on Arweave/SmartWeave
 
 ## Others
 - TODO: Check https://sui.io/#community
 - TODO: Check https://celestia.org/
-- TODO: Write some codes?
+- TODO: What about Homomorphic encryption while in proxy?
+- TODO: How to simulate these custom made blockchain/exchanges/makers behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)? 
