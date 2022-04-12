@@ -17,6 +17,8 @@ This is just the beginning, here is the list of other malversations:
 - Brokers can even close your positions if you are able to earn too much money on leverage positions like EXANTE or XTB (XTB - Polish Broker Forex & CFD)!
 - You don't own your asset and there are different types of brokers so your assets can be less or more secure. It leads to other malversations this is why European Union has Directive 2014/65/EU, commonly known as MiFID 2.
 - Information exploitation like Front-Running by brokers like Citadel Securities on its own clients between 2012 and 2014.
+- Cancelation of short positions of hedge funds and investment banks on wheat/lithium that skyrockets after the war in Ukraine 24.2.2022. Cancelation of transactions is for investment banks, for you Mr. Smith there is a normal margin call!
+- A hedge funds can loan money and use it for investment even if they can't cover this later.
 
 Today we can build trustless decentralized exchanges (DEX) that are fully transparent and secure.
 
