@@ -54,7 +54,7 @@ Wyvern documentation also mentions a special case with Ethereum which can only b
 
 The creators of the protocol don't mention too much about the matching algorithms and who will pay for its execution. We can only assume that sooner or later some application will be created to do so and people will run it locally to find a match for the orders. Also, maybe 3rd party paid services will be created to do so because they need to be incentivized somehow from a game theory perspective since they have no interest in doing it for free (or maybe it will be some charity project).
 
-## SmartWeave SDK v2
+## SmartWeave
 Although Wyvern on Ethereum seems to be a really interesting protocol to exchange ERC tokens like CryptoKitties but unfortunately it's very limited for building a highly scalable knowledge economy platform with homomorphic encryption around big data stored as permaweb (https://arwiki.wiki/#/en/the-permaweb) or IPFS (https://ipfs2arweave.com/).
 
 It's mainly because of different requirements. We want to be able to store a variety of data with different sizes that only the owner has access to - not only standardized tokens (Wrapped AR can be used, more here https://medium.com/everfinance/what-is-wrapped-ar-c4b4375290b9). Later we want to match clients with data processors that will process this data in a secure way. Finally, we want to build an economy around that process. This is why Arweave/SmartWeave SDK v2 (https://smartweave.docs.redstone.finance/) with permaweb concepts seems to be a good fit to cover use cases like this:
@@ -62,7 +62,7 @@ It's mainly because of different requirements. We want to be able to store a var
 - There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
 - There is a medical company or patient that wants to analyze medical data (like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
-## Proposed solution
+## SmartWeave Proposed solution
 TODO: Write down the proposed solution but firstly we need to answer this question
 
 The general question is what digital assets will be on this market and how they will be traded? Is it will be some standardized tokens or custom prepared results of homomorphic encryption execution or maybe both?
