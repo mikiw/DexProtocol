@@ -3,7 +3,7 @@ This documentation is a first draft of building a decentralized exchange of know
 
 Firstly I'll explain the domain of asset exchanges, later I'll show the differences between Ethereum/Wyvern Protocol and Arweave/SmartWeave and finally I'll explain how to implement DEX using SmartWeave SDK v2.
 
-## Centralized exchanges (CEX) vs decentralized exchanges (DEX).
+## Centralized exchanges (CEX) vs decentralized exchanges (DEX)
 Centralized exchanges (CEX) of assets like NYSE, Nasdaq or Binance are based on a trusted third party that helps conduct transactions for a known in advance fee. Clients of that exchanges submit orders generally with the price that they are willing to pay, the quantity of stocks/assets, type (market/limit), and expiration time. Later the matching algorithm based on the order book meets the buyer and seller.
 
 It's a completely wrong way of doing things.
@@ -17,26 +17,17 @@ This is just the beginning, here is the list of other malversations:
 - Brokers can even close your positions if you are able to earn too much money on leverage positions like EXANTE or XTB (XTB - Polish Broker Forex & CFD)!
 - You don't own your asset and there are different types of brokers so your assets can be less or more secure. It leads to other malversations this is why European Union has Directive 2014/65/EU, commonly known as MiFID 2.
 - Information exploitation like Front-Running by brokers like Citadel Securities on its own clients between 2012 and 2014.
-- Cancelation of short positions of hedge funds and investment banks on wheat/lithium that skyrockets after the war in Ukraine 24.2.2022. Cancelation of transactions is for investment banks, for you Mr. Smith there is a normal margin call!
+- Cancelation of short positions of hedge funds and investment banks on wheat/lithium that skyrockets after the war in Ukraine 24.2.2022! Cancelation of transactions is for investment banks, for you Mr. Smith there is a normal margin call!
 - A hedge funds can loan money and use it for investment even if they can't cover this later.
 
 Today we can build trustless decentralized exchanges (DEX) that are fully transparent and secure.
 
-## CEX vs DEX Problems.
-TODO: Write down core problems with moving from centralized to decentralized exchanges like:
-- Orderbooks vs AAM
-- If we will have an order book in DEX who will pay for gas? What if small order for 1$ will trigger a waterfall of other orders for 100000$, who will pay the gas fee?
-- Off-chain vs on-chain and game theory behind that in both cases in case of market makers
-- How arbitration of off-chain market makers will work in a decentralized world? Will it be worth competing from a game theory perspective?
-- Read more about matching algorithms on exchanges.
-- vs decentralized like Uniswap, dYdX.
-- TODO: Read more about DeFi's, DEXs and AMMs and write down core concepts.
+## CEX vs DEX problems and solutions
+Decentralized exchanges based on old concepts like order books with only on-chain processing can't be efficient today. This can lead to a problem when a 1$ order can trigger a waterfall of gas costly orders worth 100$, which makes no sense. This is why we should move the matching algorithm off-chain and incentivize these 3rd party services somehow, maybe with a fee. On-chain data should only contain actual exchange not matching mechanism.
 
-## Solutions.
-- TODO: Brief introduction of solutions for given problems.
-- TODO: What is Asset/Order data structure? What contracts are needed? Or how custom-made blockchain will look like?
-- TODO: Orders with a lump sum fee for all like in a centralized world (NYSE/Nasdaq/Binance) that the client needs to pay?
-- TODO: Competing market makers with a lump sum or dynamic fees?
+We can also use a completely new way of automatic trading of digital assets which is automated market maker (AMM). An AMM is a way used to provide liquidity in decentralized finance (DeFi) which can replace a traditional concept of buyer and seller like in order book. Most common known protocol is Uniswap v3 (https://docs.uniswap.org/) but there is plenty of them.
+
+It's a completely different way of creating a market of digital assets where prices of assets are determined by a constant mathematical formula (like XYK model). Now users are trading against the liquidity pool. Liquidity providers can be incentivized to add liquidity with part of the fee or with reward tokens. It sounds like a perfect way to get rich quickly, unfortunately, it's not because of phenomenon called impermanent loss.
 
 ## Wyvern Protocol.
 
@@ -62,19 +53,21 @@ Questions:
 - TODO: Is it true that ERC-20/ERC-721/ERC-1155 only?
 - TODO: ERC-1271 - what is that?
 - TODO: If I have 2 tokens on ERC-621 can I swap them in Wyvern?
-- TODO: What if self-destruct will be executed?)
+- TODO: What if self-destruct will be executed?
 
 ## SmartWeave SDK v2
-Although Wyvern on Ethereum seems to be a really interesting protocol to exchange CryptoKitties it's very limited to build a highly scalable knowledge economy platform with homomorphic encryption around big data stored as permaweb (https://arwiki.wiki/#/en/the-permaweb) or IPFS (https://ipfs2arweave.com/).
+Although Wyvern on Ethereum seems to be a really interesting protocol to exchange ERC tokens like CryptoKitties but unfortunately it's very limited for building a highly scalable knowledge economy platform with homomorphic encryption around big data stored as permaweb (https://arwiki.wiki/#/en/the-permaweb) or IPFS (https://ipfs2arweave.com/).
 
-It's mainly because of different requirements. We want to be able to store a variety of data with different sizes that only the owner has access to. Later we want to match clients with data processors that will process this data in a secure way. Finally, we want to build an economy around that process. This is why Arweave/SmartWeave SDK v2 (https://smartweave.docs.redstone.finance/) with permaweb concepts seems to be a good fit to cover use cases like this:
+It's mainly because of different requirements. We want to be able to store a variety of data with different sizes that only the owner has access to - not only standardized tokens (Wrapped AR can be used, more here https://medium.com/everfinance/what-is-wrapped-ar-c4b4375290b9). Later we want to match clients with data processors that will process this data in a secure way. Finally, we want to build an economy around that process. This is why Arweave/SmartWeave SDK v2 (https://smartweave.docs.redstone.finance/) with permaweb concepts seems to be a good fit to cover use cases like this:
 - There are clients that want to calculate taxes in Canada with a pretty easy tax system, but they don't want to reveal how much they earn. There is a digitalized accounting company that is writing its own solution to calculate tax. The processor is processing encrypted data for clients for payment.
 - There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
 - There is a medical company or patient that wants to analyze medical data(like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
-## SmartWeave SDK v2
-- TODO: Write down about proposed solution
-- TODO: What about Homomorphic encryption while in proxy?
+## SmartWeave SDK v2 proposed solution
+TODO: Write down about proposed solution.
+- Solution A) Economy market for assets based on the register and proxy smart contract on-chain and the off-chain matching algorithm.
+- Solution B) Economy market for assets based on AAM.
+- Solution C) Economy market for knowledge economy based on data and processing of it with the possibility of using homomorphic encryption concepts.
 
 ## Others
 - TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
