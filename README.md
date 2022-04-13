@@ -37,10 +37,10 @@ Currently, Wyvern supports:
 - ERC-20 Tokens
 - ERC-1155 Multi Tokens
 - ERC-721 NFTs
-- ERC-1271 off-chain
+- ERC-1271 off-chain signature validation assets
 - All backward compatible tokens like ERC-621 and more
 
-For now, it's enough, in the future new standards will be added according to Wyvern DAO. Also all predicates in Wyvern are arbitrary and they can be any asset or combination of assets. Just try to swap AAPL and GOOGL from Nasdaq for VISA on NYSE, good luck with that!
+For now, it's enough but in the future new standards will be added according to Wyvern DAO. Also all predicates in Wyvern are arbitrary and they can be any asset or combination of assets. Just try to swap AAPL and GOOGL from Nasdaq for VISA on NYSE, good luck with that!
 
 So how it works?
 
@@ -62,8 +62,12 @@ It's mainly because of different requirements. We want to be able to store a var
 - There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
 - There is a medical company or patient that wants to analyze medical data (like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
-## SmartWeave SDK v2 proposed solution
-TODO: Write down the proposed solution.
+## Proposed solution
+TODO: Write down the proposed solution but firstly we need to answer this question
+
+The general question is what digital assets will be on this market and how they will be traded? Is it will be some standardized tokens or custom prepared results of homomorphic encryption execution or maybe both?
+
+For now I can see these variants:
 - Solution A) Economy market for assets based on the register and proxy smart contract on-chain and the off-chain matching algorithm.
 - Solution B) Economy market for assets based on AAM.
 - Solution C) Economy market for knowledge economy based on data and processing of it with the possibility of using homomorphic encryption concepts.
