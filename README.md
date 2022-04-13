@@ -23,7 +23,7 @@ This is just the beginning, here is the list of other malversations:
 Today we can build trustless decentralized exchanges (DEX) that are fully transparent and secure.
 
 ## CEX vs DEX problems and solutions
-Decentralized exchanges based on old concepts like order books with only on-chain processing can't be efficient today. This can lead to a problem when a 1$ order can trigger a waterfall of gas costly orders worth 100$, which makes no sense. This is why we should move the matching algorithm off-chain and incentivize these 3rd party services somehow, maybe with a fee. On-chain data should only contain actual exchange not matching mechanism.
+Decentralized exchanges based on old concepts like order books with only on-chain processing can't be efficient today. This can lead to a problem when a 1$ order can trigger a waterfall of gas costly orders worth 100$, which makes no sense. This is why we should move the matching algorithm off-chain and incentivize these 3rd party services somehow, maybe with a fee. With this approach on-chain logic contains only the swapping assets part of the overall exchange logic
 
 We can also use a completely new way of automatic trading of digital assets which is automated market maker (AMM). An AMM is a way used to provide liquidity in decentralized finance (DeFi) which can replace a traditional concept of buyer and seller like in order book. Most common known protocol is Uniswap v3 (https://docs.uniswap.org/) but there is plenty of them.
 
