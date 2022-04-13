@@ -33,9 +33,14 @@ It's a completely different way of creating a market of digital assets where pri
 
 Wyvern (https://wyvernprotocol.com/ https://github.com/wyvernprotocol/wyvern-v3/tree/master/contracts) is the most advanced decentralized exchange protocol designed to transfer Ethereum-based assets. Now you can exchange your Tokens, Assets, and CryptoKitties in a trustless way on Wyvern Exchange (https://exchange.projectwyvern.com/ [Currently not working]).
 
-Currently, Wyvern supports ERC-20 Tokens, ERC-1155 Multi Tokens, and ERC-721 NFTs so it's enough for now. In the future new standards will be added according to Wyvern DAO.
+Currently, Wyvern supports:
+- ERC-20 Tokens
+- ERC-1155 Multi Tokens
+- ERC-721 NFTs
+- ERC-1271 off-chain
+- All backward compatible tokens like ERC-621 and more
 
-Predicates in Wyvern are arbitrary and they can be any asset or combination of assets. Just try to swap AAPL and GOOGL from Nasdaq for VISA on NYSE, good luck with that!
+For now, it's enough, in the future new standards will be added according to Wyvern DAO. Also all predicates in Wyvern are arbitrary and they can be any asset or combination of assets. Just try to swap AAPL and GOOGL from Nasdaq for VISA on NYSE, good luck with that!
 
 So how it works?
 
@@ -48,12 +53,6 @@ In the end, a final order can be constructed and authorized by the maker of the 
 Wyvern documentation also mentions a special case with Ethereum which can only be sent from an account by a transaction.
 
 The creators of the protocol don't mention too much about the matching algorithms and who will pay for its execution. We can only assume that sooner or later some application will be created to do so and people will run it locally to find a match for the orders. Also, maybe 3rd party paid services will be created to do so because they need to be incentivized somehow from a game theory perspective since they have no interest in doing it for free (or maybe it will be some charity project).
-
-Questions:
-- TODO: Is it true that ERC-20/ERC-721/ERC-1155 only?
-- TODO: ERC-1271 - what is that?
-- TODO: If I have 2 tokens on ERC-621 can I swap them in Wyvern?
-- TODO: What if self-destruct will be executed?
 
 ## SmartWeave SDK v2
 Although Wyvern on Ethereum seems to be a really interesting protocol to exchange ERC tokens like CryptoKitties but unfortunately it's very limited for building a highly scalable knowledge economy platform with homomorphic encryption around big data stored as permaweb (https://arwiki.wiki/#/en/the-permaweb) or IPFS (https://ipfs2arweave.com/).
