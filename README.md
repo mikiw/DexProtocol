@@ -1,5 +1,5 @@
 # DexProtocol
-This documentation is a first draft of building a decentralized exchange of assets on Arweave/SmartWeave with similar concepts as Wyvern Protocol has on Ethereum.
+This documentation is a first draft of building a decentralized exchange of knowledge economy on Arweave/SmartWeave with similar concepts as Wyvern Protocol has on Ethereum.
 
 Firstly I'll explain the domain of asset exchanges, later I'll show the differences between Ethereum/Wyvern Protocol and Arweave/SmartWeave and finally I'll explain how to implement DEX using SmartWeave SDK v2.
 
@@ -22,7 +22,7 @@ This is just the beginning, here is the list of other malversations:
 
 Today we can build trustless decentralized exchanges (DEX) that are fully transparent and secure.
 
-### CEX vs DEX Problems.
+## CEX vs DEX Problems.
 TODO: Write down core problems with moving from centralized to decentralized exchanges like:
 - Orderbooks vs AAM
 - If we will have an order book in DEX who will pay for gas? What if small order for 1$ will trigger a waterfall of other orders for 100000$, who will pay the gas fee?
@@ -38,9 +38,9 @@ TODO: Write down core problems with moving from centralized to decentralized exc
 - TODO: Orders with a lump sum fee for all like in a centralized world (NYSE/Nasdaq/Binance) that the client needs to pay?
 - TODO: Competing market makers with a lump sum or dynamic fees?
 
-### Wyvern Protocol.
+## Wyvern Protocol.
 
-Wyvern (https://wyvernprotocol.com/ https://github.com/wyvernprotocol/wyvern-v3/tree/master/contracts) is the most advanced decentralized exchange protocol designed to transfer Ethereum-based assets. Now you can exchange your Tokens, Assets, and CryptoKitties in a trustless way on Wyvern Exchange (https://exchange.projectwyvern.com/ [Currently not working]) or OpenSea (https://opensea.io/)!
+Wyvern (https://wyvernprotocol.com/ https://github.com/wyvernprotocol/wyvern-v3/tree/master/contracts) is the most advanced decentralized exchange protocol designed to transfer Ethereum-based assets. Now you can exchange your Tokens, Assets, and CryptoKitties in a trustless way on Wyvern Exchange (https://exchange.projectwyvern.com/ [Currently not working]).
 
 Currently, Wyvern supports ERC-20 Tokens, ERC-1155 Multi Tokens, and ERC-721 NFTs so it's enough for now. In the future new standards will be added according to Wyvern DAO.
 
@@ -64,14 +64,17 @@ Questions:
 - TODO: If I have 2 tokens on ERC-621 can I swap them in Wyvern?
 - TODO: What if self-destruct will be executed?)
 
-### SmartWeave SDK v2
-- TODO: Write down what is SmartWeave SDK v2 https://smartweave.docs.redstone.finance/.
-- TODO: Check codes https://github.com/ArweaveTeam/SmartWeave.
-- TODO: What is Redstone https://docs.google.com/document/d/1_5uagYbOklSEERt1ZvfVki01yC9sQt7Y5BBsisejHKM/edit.
-- TODO: Write down about proposed solution similar to Wyvern but on Arweave/SmartWeave
+## SmartWeave SDK v2
+Although Wyvern on Ethereum seems to be a really interesting protocol to exchange CryptoKitties it's very limited to build a highly scalable knowledge economy platform with homomorphic encryption around big data stored as permaweb (https://arwiki.wiki/#/en/the-permaweb) or IPFS (https://ipfs2arweave.com/).
+
+It's mainly because of different requirements. We want to be able to store a variety of data with different sizes that only the owner has access to. Later we want to match clients with data processors that will process this data in a secure way. Finally, we want to build an economy around that process. This is why Arweave/SmartWeave SDK v2 (https://smartweave.docs.redstone.finance/) with permaweb concepts seems to be a good fit to cover use cases like this:
+- There are clients that want to calculate taxes in Canada with a pretty easy tax system, but they don't want to reveal how much they earn. There is a digitalized accounting company that is writing its own solution to calculate tax. The processor is processing encrypted data for clients for payment.
+- There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
+- There is a medical company or patient that wants to analyze medical data(like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
+
+## SmartWeave SDK v2
+- TODO: Write down about proposed solution
+- TODO: What about Homomorphic encryption while in proxy?
 
 ## Others
-- TODO: Check https://sui.io/#community
-- TODO: Check https://celestia.org/
-- TODO: What about Homomorphic encryption while in proxy?
-- TODO: How to simulate these custom made blockchain/exchanges/makers behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)? 
+- TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
