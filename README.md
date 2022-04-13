@@ -1,7 +1,7 @@
 # DexProtocol
-This documentation is a first draft of building a decentralized exchange of knowledge economy on Arweave/SmartWeave with similar concepts as Wyvern Protocol has on Ethereum.
+This documentation is a first draft of building a decentralized exchange of digital assets and knowledge economy on Arweave/SmartWeave with similar concepts as Wyvern Protocol has on Ethereum.
 
-Firstly I'll explain the domain of asset exchanges, later I'll show the differences between Ethereum/Wyvern Protocol and Arweave/SmartWeave and finally I'll explain how to implement DEX using SmartWeave SDK v2.
+Firstly I'll explain the domain of digital asset exchanges, later I'll show the differences between Ethereum/Wyvern Protocol and Arweave/SmartWeave and finally I'll explain how to implement DEX using SmartWeave SDK v2.
 
 ## Centralized exchanges (CEX) vs decentralized exchanges (DEX)
 Centralized exchanges (CEX) of assets like NYSE, Nasdaq or Binance are based on a trusted third party that helps conduct transactions for a known in advance fee. Clients of that exchanges submit orders generally with the price that they are willing to pay, the quantity of stocks/assets, type (market/limit), and expiration time. Later the matching algorithm based on the order book meets the buyer and seller.
@@ -61,13 +61,14 @@ Although Wyvern on Ethereum seems to be a really interesting protocol to exchang
 It's mainly because of different requirements. We want to be able to store a variety of data with different sizes that only the owner has access to - not only standardized tokens (Wrapped AR can be used, more here https://medium.com/everfinance/what-is-wrapped-ar-c4b4375290b9). Later we want to match clients with data processors that will process this data in a secure way. Finally, we want to build an economy around that process. This is why Arweave/SmartWeave SDK v2 (https://smartweave.docs.redstone.finance/) with permaweb concepts seems to be a good fit to cover use cases like this:
 - There are clients that want to calculate taxes in Canada with a pretty easy tax system, but they don't want to reveal how much they earn. There is a digitalized accounting company that is writing its own solution to calculate tax. The processor is processing encrypted data for clients for payment.
 - There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
-- There is a medical company or patient that wants to analyze medical data(like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
+- There is a medical company or patient that wants to analyze medical data (like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
 ## SmartWeave SDK v2 proposed solution
-TODO: Write down about proposed solution.
+TODO: Write down the proposed solution.
 - Solution A) Economy market for assets based on the register and proxy smart contract on-chain and the off-chain matching algorithm.
 - Solution B) Economy market for assets based on AAM.
 - Solution C) Economy market for knowledge economy based on data and processing of it with the possibility of using homomorphic encryption concepts.
+- Solution D) Any variation of A, B, or C.
 
 ## Others
 - TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
