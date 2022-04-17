@@ -1,4 +1,4 @@
-# DexProtocol
+# DEX, Wyvern Protocol, SmartWeave Concepts
 This documentation is a first draft of building a decentralized exchange of digital assets and knowledge economy on Arweave/SmartWeave with similar concepts as Wyvern Protocol has on Ethereum.
 
 Firstly I'll explain the domain of digital asset exchanges, later I'll show the differences between Ethereum/Wyvern Protocol and Arweave/SmartWeave and finally I'll explain how to implement DEX using SmartWeave SDK v2.
@@ -29,7 +29,7 @@ We can also use a completely new way of automatic trading of digital assets whic
 
 It's a completely different way of creating a market of digital assets where prices of assets are determined by a constant mathematical formula (like XYK model). Now users are trading against the liquidity pool. Liquidity providers can be incentivized to add liquidity with part of the fee or with reward tokens. It sounds like a perfect way to get rich quickly, unfortunately, it's not because of phenomenon called impermanent loss.
 
-## Wyvern Protocol.
+## Wyvern Protocol
 
 Wyvern (https://wyvernprotocol.com/ https://github.com/wyvernprotocol/wyvern-v3/tree/master/contracts) is the most advanced decentralized exchange protocol designed to transfer Ethereum-based assets. Now you can exchange your Tokens, Assets, and CryptoKitties in a trustless way on Wyvern Exchange (https://exchange.projectwyvern.com/ [Currently not working]).
 
@@ -62,16 +62,10 @@ It's mainly because of different requirements. We want to be able to store a var
 - There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
 - There is a medical company or patient that wants to analyze medical data (like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
-## SmartWeave Proposed solution
-TODO: Write down the proposed solution but firstly we need to answer this question
+# SmartWeave SDK v2 Technical insight
+TODO: Write down the proposed technical insight based on register and proxy smart contract on-chain and the off-chain matching algorithm like Wyvern on Eth.
 
-The general question is what digital assets will be on this market and how they will be traded? Is it will be some standardized tokens or custom prepared results of homomorphic encryption execution or maybe both?
-
-For now I can see these variants:
-- Solution A) Economy market for assets based on the register and proxy smart contract on-chain and the off-chain matching algorithm.
-- Solution B) Economy market for assets based on AAM.
-- Solution C) Economy market for knowledge economy based on data and processing of it with the possibility of using homomorphic encryption concepts.
-- Solution D) Any variation of A, B, or C.
-
-## Others
+## Others for future:
+- TODO: Extend this solution with AAM version
+- TODO: Extend this solution with homomorphic encryption
 - TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
