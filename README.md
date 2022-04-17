@@ -66,6 +66,6 @@ It's mainly because of different requirements. We want to be able to store a var
 TODO: Write down the proposed technical insight based on register and proxy smart contract on-chain and the off-chain matching algorithm like Wyvern on Eth.
 
 ## Others for future:
-- TODO: Extend this solution with AAM version
+- TODO: Extend this solution with AAM version for assets
 - TODO: Extend this solution with homomorphic encryption
 - TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
