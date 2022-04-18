@@ -63,9 +63,103 @@ It's mainly because of different requirements. We want to be able to store a var
 - There is a medical company or patient that wants to analyze medical data (like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
 # SmartWeave SDK v2 Technical insight
-TODO: Write down the proposed technical insight based on register and proxy smart contract on-chain and the off-chain matching algorithm like Wyvern on Eth.
+The purpose of that specification is to explain developers how to implement Wyvern like protocol on SmartWeave SDK v2.
+
+## Assets
+Although Arweave doesn't support ERC-20 like tokens we can assume that supported tokens must implement at least 
+`transfer` function.
+
+TODO: write more about that!
+
+## Order type
+To build decentralized exchange on SmartWeave smart contract protocol we need to specify our order schema.
+
+|Name|Type|Purpose|
+|----|-----|-------|
+|maker|string|Address of order maker.|
+|makerToken|string|Address of token to sell.|
+|makerTokenAmount|number|Amount of token to sell.|
+|takerToken|string|Address of token to buy.|
+|takerTokenAmount|number|Amount of token to buy.|
+|expires|number|Order expiration in Unix Timestamp format.|
+
+Since SmartWeave SDK V2 supports typescript we will use <code>interface</code> `interface` to define order structure:
+
+```Typescript
+interface Order {
+    maker: string;
+    makerToken: string;
+    makerTokenAmount: number;
+    takerToken: string;
+    takerTokenAmount: number;
+    isActive: boolean;
+    expires: number;
+}
+```
+
+## Orders Registry
+
+Registry will be our on-chain contract that will store all valid orders. Any user will be able to read it and find matches in orders. Our clients will need to run a matching algorithm off-chain or use 3rd party services to find matching orders.
+
+```Typescript
+interface Registry {
+    orders: Order[];
+}
+```
+
+TODO: this will look differently
+<code>RegisterOrder(IOrder order)</code> 
+<code>CancelOrder(IOrder order)</code>
+
+## Off-chain matching algorithm
+TODO: write about matching algorithm.
+
+It's recommended to use `SmartWeaveNodeFactory` to quickly obtain a fully configured, file-cacheable SmartWeave instance to read state of the contract that's held `orders` in the registry.
+
+## Vault 
+Vault will be our proxy contract for holding assets during an exchange.
+TODO: write more about that! How to Approve / Authenticate trade?
+
+TODO: this will look differently
+<code>DepositAsset()</code> 
+<code>WithdrawAsset()</code>
+<code>Approve()</code>
+<code>Exchange()</code>
+
+When the buyer meets the seller and both parties will authorize the transaction, successful trade can be executed in a decentralized trustless way. This is optional but we want to implement something like events on Ethereum.
+
+We can register these successful trades with data structure like this:
+```Typescript
+interface Traded {
+    hash: string;
+    maker: string;
+    makerToken: string;
+    makerTokenAmount: number;
+    taker: string;
+    takerToken: string;
+    takerTokenAmount: number;
+}
+
+interface Trades {
+    orders: Traded[];
+}
+```
+
+## Useful links for Devs to read before implementing:
+- https://arweave.medium.com/introducing-smartweave-building-smart-contracts-with-arweave-1fc85cb3b632 introducing of SmartWeave
+- https://cedriking.medium.com/lets-buidl-smartweave-contracts-6353d22c4561 building on SmartWeave V1 part 1 
+- https://cedriking.medium.com/lets-buidl-smartweave-contracts-2-16c904a8692d  building on SmartWeave V1 part 2
+- https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js example of token code for SmartWeave V1
+- https://smartweave.docs.redstone.finance/#smartweave-sdk-v2 SmartWeave V2 SDK documentation
+- https://github.com/redstone-finance/redstone-smartcontracts-examples code examples for SmartWeave V2 SDK
+- https://github.com/redstone-finance/redstone-smartcontracts [TODO]
+- https://github.com/redstone-finance/smartweave-loot/blob/main/docs/LOOT_CONTRACT_TUTORIAL.md Implementation tutorial for loot contract on SmartWeave
+- https://github.com/ArweaveTeam/SmartWeave/blob/master/CONTRACT-GUIDE.md Contract Writing Guide
+- https://github.com/redstone-finance/redstone-smartcontracts/blob/main/docs/SMARTWEAVE_PROTOCOL.md SmartWeave Protocol
+- https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/read-other-contract.js Read operation example
 
 ## Others for future:
+- TODO: Add predicate version of Order that can support multiply tokens types like on wyvern protocol
 - TODO: Extend this solution with AAM version for assets
 - TODO: Extend this solution with homomorphic encryption
 - TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
