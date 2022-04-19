@@ -155,20 +155,24 @@ const { state, validity } = await cxyzContract.readState();
 ```
 
 ## Off-chain matching algorithm
-TODO: write about matching algorithm.
-TODO: what we need to do after match?
+TODO: Write about off-chain matching algorithm.
 
 ## Vault
 Vault will be our proxy for holding assets during an exchange. Firstly entity needs to send tokens to a contract vault, later it can perform a `DepositAsset(arweaveTxId: string)` function to increase its vault balance based on transaction Id. Our vault contract function will read transaction details and will add the balance of a specific token if it's whitelisted. After that, we will register that this deposit was already processed in `state.deposits` by adding there arweaveTxId. We can't prevent sending to vault address tokens that are not whitelisted so tokens like this will be lost forever and its design decision. We also need to agree on the number of confirmations that are needed to trust transaction.
 
-If an entity will change its mind `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)` function can be called and the vault contract will decrease the balance of that token and will transfer it to the indicated wallet address. Implementation will need to perform multiple checks for example if the caller can withdraw the balance or if tokens are still on the whitelist. In rare cases, token contracts can be delisted for security reasons, in that case, we will need to wait for them to be whitelisted again, or ask DAO to handle that exception because we don't want to load malicious smart contracts into our contract memory during execution.
+If an entity will change its mind `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)` function can be called and the vault contract will decrease the balance of that token and will transfer it to the indicated wallet address with `Contract.writeInteraction` function. Implementation will need to perform multiple checks for example if the caller can withdraw the balance or if tokens are still on the whitelist. In rare cases, token contracts can be delisted for security reasons, in that case, we will need to wait for them to be whitelisted again, or ask DAO to handle that exception because we don't want to load malicious smart contracts into our contract memory during execution.
 
-TODO: How to Approve / Authenticate / Exchange? Write more about that!
-Now our contract can TODO: write more:
+When all exchange criteria are met:
+- Both orders are `active` and not `filled`
+- Both orders are not in the `expired` state
+- Both entities have enough funds in `vault`
+
+We can perform an exchange of assets by executing `ExchangeAssets(callerTxId: string, takerTxId: string)` function by `maker` or `taker`. Now we will increase and decrease token balances of both entities in the vault.
+After that we will add `Trade` record in `Trades`, first id which is `callerTxId` will be a caller `txId` of `ExchangeAssets()` method, second will be a `takerTxId`. After that action both entities can withdraw tokens with `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)`.
 
 ```Typescript
 interface Trade {
-    makerTxId: string;
+    callerTxId: string;
     takerTxId: string;
 }
 
@@ -184,7 +188,7 @@ const token = smartweave.contract("TOKEN_CONTRACT_ADDRESS");
 const result = await token.writeInteraction<any>({
     function: "transfer",
     data: {
-        qty: X,
+        qty: QUANTITY,
     },
 });
 ```
@@ -282,6 +286,17 @@ export function handle (state, action) {
         // TODO: Decrease the vault balance of digital asset for a given caller.
     }
 
+    if (input.function === 'ExchangeAssets') {
+        const todo = input.target
+
+        // TODO: Implement required checks for example check if orders are active
+        // and not filled. Check if both orders are not in the expired state.
+        // TODO: Check if entities have enough funds in vault.
+        // TODO: Check if orders are complementary like 1A:10B and 10B:1A.
+        // TODO: Change state of vault balances for both entities.
+        // TODO: Add record to Trades array.
+    }
+
     throw new ContractError(`No function supplied or function not recognised: "${input.function}"`)
 }
 ```
@@ -341,7 +356,7 @@ entity Z register valut deposit balance of token B (DepositAsset(arweaveTxId: st
 ```
 
 ```Typescript
-Later actions for echange scenario:
+Later actions for exchange scenario:
 Vault state of V contract:
 state.vault[token A][Y] = 10
 state.vault[token B][Z] = 1
@@ -368,16 +383,19 @@ state.vault[token A][Y] = 0
 state.vault[token B][Z] = 0
 ```
 
-### Part 4 echange scenario
+### Part 4 exchange scenario
 ```Typescript
-
+TODO:
 ```
 
 ## Others for future:
 - TODO: Better format links.
-- TODO: Implement functions and tests.
+- TODO: Write about off-chain matching algorithm.
+- TODO: Part 4 exchange scenario.
 - TODO: Add SDK v2 Syntax like [this](https://github.com/redstone-finance/smartweave-loot/blob/main/src/contracts/loot/contract.js).
 - TODO: Decide if the whitelist should have an active flag or just add/delete in the array.
+
+- TODO: Implement functions and tests.
 - TODO: Add more information about gas fees and who will pay for what.
 - TODO: Add possibility to trade AR for tokens.
 - TODO: Research possibility of a SmartWeave/Ethereum bridge.
