@@ -262,6 +262,44 @@ export function handle (state, action) {
 }
 ```
 
+## State example
+This is state transition example for entities X, Y, Z and tokens A, B.
+
+### Part 1 token distribution
+```Typescript
+Token A contract state:
+state.balances[X] = 1000
+
+Later actions:
+transfer 10 token A from X to Y
+transfer 10 token A from X to Z
+
+New state of token A contact:
+state.balances[X] = 980
+state.balances[Y] = 10
+state.balances[Z] = 10
+
+Token B contract state:
+state.balances[X] = 100
+
+Later actions:
+transfer 1 token B from X to Y
+transfer 1 token B from X to Z
+
+New state of token B contact:
+state.balances[X] = 98
+state.balances[Y] = 1
+state.balances[Z] = 1
+```
+
+### Part 2 token orders in registry
+```Typescript
+Later actions:
+entity Y register order to exchange 10x token A for 2x token B
+entity Z register order to exchange 2xx token B for 10 token A
+we have a match!
+```
+
 ## Others for future:
 - TODO: implement functions and tests
 - TODO: Add predicate version of Order that can support multiply tokens types like on wyvern protocol
