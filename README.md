@@ -62,17 +62,14 @@ It's mainly because of different requirements. We want to be able to store a var
 - There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
 - There is a medical company or patient that wants to analyze medical data (like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
-# SmartWeave SDK v2 Technical insight
-The purpose of that specification is to explain developers how to implement Wyvern like protocol on SmartWeave SDK v2.
+# SmartWeave Technical insight
+The purpose of that specification is to explain developers how to implement Wyvern like protocol on SmartWeave.
 
-Our DEX contract state will store the following data:
-
-We will implement our DEX based on components listed below. They can be separate contracts or just state representation in one contract (further investigation is needed):
+We will implement our DEX based on components listed below. They can be separate contracts or just state representation in one contract:
 - `Owner` of DEX set in initial state, this is required for whitelisting tokens by DAO
 - `Whitelist` of all possible ditial tokens assets that will be audited by DAO organization
-- `Registry` of orders that clients want to perform
-- `Vault` as a proxy between maker and taker while they performing asset exchange
-- `Trades` of all successfully performed trades, mainy for log proposuses like events in Ethereum
+- `Registry` of orders that entities want to perform
+- `Vault` as a proxy between maker and taker while they are performing asset exchange
 
 Our initial state will look like this:
 ```JSON
@@ -80,8 +77,8 @@ Our initial state will look like this:
     "owner": "CONTRACT_CREATOR_ADDRESS",
     "whitelist": [],
     "registry": [],
-    "vault": [],
-    "trades": [],
+    "deposits": [],
+    "vault": [][],
 }
 ```
 
@@ -93,7 +90,7 @@ Ecosystem can also include:
 Although Arweave doesn't support ERC-20 like tokens we can assume that supported tokens must implement at least 
 `transfer` and `balance` functions. We can assume that the implementation of that tokens will look like this https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js.
 
-To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a whitelist. We will provide two methods `AddToWhitelist(address: string)` and `RemoveFromWhitelist(address: string)` for storing and removing whitelisted contract in the vault contract state.
+To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a whitelist. We will provide two methods `AddToWhitelist(address: string)` and `RemoveFromWhitelist(address: string)` for storing and removing whitelisted contract in the vault contract state by vault contract owner (DAO). It's both a design and a security decision (We can also implement this DEX without DAO and whitelists if needed).
 
 ```Typescript
 interface Whitelist {
@@ -102,7 +99,7 @@ interface Whitelist {
 ```
 
 ## Order type and Registry
-To build decentralized exchange on SmartWeave smart contract protocol we need to specify our order schema.
+To build decentralized order book exchange on SmartWeave smart contract protocol we need to specify our order schema.
 
 |Name|Type|Purpose|
 |----|-----|-------|
@@ -113,6 +110,7 @@ To build decentralized exchange on SmartWeave smart contract protocol we need to
 |takerTokenAmount|number|Amount of token to exchange by taker.|
 |isActive|number|Order can be canceled in anytime by order maker.|
 |expires|number|Order expiration in Unix Timestamp format or block height (TODO: what is better?).|
+|txId|string|Transaction hash identifier to distinguish orders with same data. We can't add new `Order` if given txId is already in the registry.|
 
 To define order structure we will use this `interface`:
 
@@ -124,11 +122,12 @@ interface Order {
     takerToken: string;
     takerTokenAmount: number;
     isActive: boolean;
-    expires: number;
+    isFilled: boolean;
+    txId: string;
 }
 ```
 
-`Registry` will be our on-chain state that will store all valid orders. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be whitelisted and isActive must be true. We will also need to implement two functions `RegisterOrder(order: Order)` and `CancelOrder(transactionId: string)` for contract interactions with `Registry`.
+`Registry` will be our on-chain state that will store all valid orders. We will need to implement two functions `RegisterOrder(order: Order)` and `CancelOrder(txId: string)` for contract interactions with `Registry`. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be whitelisted, isActive must be true, isFilled must be false and two orders with the same txId can't exist. 
 
 ```Typescript
 interface Registry {
@@ -136,9 +135,9 @@ interface Registry {
 }
 ```
 
-Any user will be able to read `Registry` to find matches in orders. Our clients will need to do it manually, run a matching algorithm off-chain or use 3rd party services to find matching orders.
+Any entity will be able to read `Registry` to find matches in orders. Our clients will need to do it manually, run a matching algorithm off-chain or use 3rd party services to find matching orders.
 
-To read our registry we can use this code snippet:
+To read our registry we can use this code snippet from SmartWeave SDK v2:
 ```Typescript
 const contractId = "CONTRACT_ID";
 
@@ -156,46 +155,25 @@ TODO: write about matching algorithm.
 TODO: what we need to do after match?
 
 ## Vault
-Vault will be our proxy contract for holding assets during an exchange.
-TODO: write more about that! How to Approve / Authenticate trade?
-TODO: this will look differently
-TODO: read token balance? https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/read-other-contract.js
+Vault will be our proxy for holding assets during an exchange. Firstly entity needs to send tokens to a contract vault, later it can perform a `DepositAsset(arweaveTxId: string)` function to increase its vault balance based on transaction Id. Our vault contract function will read transaction details and will add the balance of a specific token if it's whitelisted. After that, we will register that this deposit was already processed in `state.deposits` by adding there arweaveTxId. We can't prevent sending to vault address tokens that are not whitelisted so tokens like this will be lost forever and its design decision. We also need to agree on the number of confirmations that are needed to trust transaction.
 
-<code>DepositAsset()</code> 
-<code>WithdrawAsset()</code>
-<code>Approve()</code>
-<code>Exchange()</code>
+If an entity will change its mind `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)` function can be called and the vault contract will decrease the balance of that token and will transfer it to the indicated wallet address. Implementation will need to perform multiple checks for example if the caller can withdraw the balance or if tokens are still on the whitelist. In rare cases, token contracts can be delisted for security reasons, in that case, we will need to wait for them to be whitelisted again, or ask DAO to handle that exception because we don't want to load malicious smart contracts into our contract memory during execution.
 
-When the buyer meets the seller and both parties will authorize the transaction, successful trade can be executed in a decentralized trustless way. This is optional but we want to implement something like events on Ethereum.
-
-We can register these successful trades with data structure like this:
-```Typescript
-interface Traded {
-    hash: string;
-    maker: string;
-    makerToken: string;
-    makerTokenAmount: number;
-    taker: string;
-    takerToken: string;
-    takerTokenAmount: number;
-}
-
-interface Trades {
-    orders: Traded[];
-}
-```
-
+TODO: How to Approve / Authenticate / Exchange? Write more about that!
+Now our contract can TODO: write more:
 ```Typescript
 Contract.writeInteraction
-const token = smartweave.contract("TOKEN_1_CONTRACT_ADDRESS");
+const token = smartweave.contract("TOKEN_CONTRACT_ADDRESS");
 
 const result = await token.writeInteraction<any>({
     function: "transfer",
     data: {
-        qty: 15100900,
+        qty: X,
     },
 });
 ```
+
+When the buyer meets the seller and both parties will authorize the transaction, successful trade can be executed in a decentralized trustless way. We can filter that filled orders using `isFilled` flag for log proposuses.
 
 ## Useful links for Devs to read before implementing:
 - https://en.wikipedia.org/wiki/Design_by_contract
@@ -211,7 +189,6 @@ const result = await token.writeInteraction<any>({
 - https://github.com/redstone-finance/redstone-smartcontracts/blob/main/docs/SMARTWEAVE_PROTOCOL.md SmartWeave Protocol
 - https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/read-other-contract.js Read operation example
 
-
 ## Smart Contract code snippet
 This is code snippet based on this documentation:
 
@@ -223,7 +200,6 @@ export function handle (state, action) {
     const whitelist = state.whitelist
     const registry = state.registry
     const vault = state.vault
-    const trades = state.trades
     
     // action
     const input = action.input
@@ -232,30 +208,50 @@ export function handle (state, action) {
     if (input.function === 'AddToWhitelist') {
         const address = input.target
 
-        // TODO: implement required checks (add if not exists and only by owner), if check will fail throw new ContractError
-        // TODO: add to address to whitelist
+        // TODO: Implement required checks (add if not exists and only by owner), if check will fail throw new ContractError.
+        // TODO: Add to token contract address to whitelist.
     }
 
     if (input.function === 'RemoveFromWhitelist') {
         const address = input.target
 
-        // TODO: implement required checks (remove only if exists and only by owner), if check will fail throw new ContractError
-        // TODO: remove address from  whitelist
+        // TODO: Implement required checks (remove only if exists and only by owner), if check will fail throw new ContractError.
+        // TODO: Remove token contract address from whitelist.
     }
     
     if (input.function === 'RegisterOrder') {
         const order = input.target
 
-        // TODO: implement required checks (like expiration time (or block heigh) higher than the current time, 
-        // tokens need to be whitelisted and isActive must be true), if check will fail throw new ContractError
-        // TODO: add order to registry
+        // TODO: Implement required checks (like expiration time (or block heigh) higher than the current time/block, 
+        // tokens need to be whitelisted, isActive must be true, isFilled must be false and txId needs to be unique).
+        // TODO: If check will fail throw new ContractError.
+        // TODO: Add order to registry.
     }
 
     if (input.function === 'CancelOrder') {
-        const transactionId = input.target
+        const orderTxId = input.target
 
-        // TODO: implement required checks (find order by transaction id and set isActive to false), if check will fail throw new ContractError
-        // TODO: remove address from  whitelist
+        // TODO: Implement required checks (find order by transaction id and check caller), if check will fail throw new ContractError.
+        // TODO: Set isActive to false.
+    }
+
+    if (input.function === 'DepositAsset') {
+        const txId = input.target
+
+        // TODO: Implement required checks (check if token contract is whitelisted from transaction details).
+        // TODO: Read transaction details from blockchain and check confirmation number.
+        // TODO: If check will fail throw new ContractError.
+        // TODO: Increase the vault balance of digital asset for a given caller.
+        // TODO: Update asset deposit registry with txId to avoid double deposit.
+    }
+    
+    if (input.function === 'WithdrawAsset') {
+        const withdrawDetails = input.target
+
+        // TODO: Implement required checks (check if token contract is whitelisted).
+        // TODO: check if caller has enough balance of that asset.
+        // TODO: If check will fail throw new ContractError.
+        // TODO: Decrease the vault balance of digital asset for a given caller.
     }
 
     throw new ContractError(`No function supplied or function not recognised: "${input.function}"`)
@@ -312,8 +308,8 @@ state.balances[Z] = 0
 state.balances[V] = 1
 
 Later actions:
-entity Y register valut balance of token A
-entity Z register valut balance of token B
+entity Y register valut deposit balance of token A (DepositAsset())
+entity Z register valut deposit balance of token B (DepositAsset())
 ```
 
 ```Typescript
@@ -324,7 +320,7 @@ state.vault[token B][Z] = 1
 ```
 
 ```Typescript
-Later actions for withdrawing scenario after performing withdraw action by both entities:
+Later actions for withdrawing scenario after performing withdraw action by both entities wtih WithdrawAsset():
 
 Token A contract will look like this:
 state.balances[X] = 980
@@ -343,15 +339,17 @@ state.vault[token A][Y] = 0
 state.vault[token B][Z] = 0
 ```
 
-
 ### Part 4 echange scenario
 ```Typescript
 
 ```
 
 ## Others for future:
-- TODO: implement functions and tests
-- TODO: Add predicate version of Order that can support multiply tokens types like on wyvern protocol
-- TODO: Extend this solution with AAM version for assets
-- TODO: Extend this solution with homomorphic encryption
+- TODO: Implement functions and tests.
+- TODO: Add more information about gas fees.
+- TODO: Research possibility of a SmartWeave/Ethereum bridge.
+- TODO: Research safe math in SmartWeave (buffer overflow scenarios etc.).
+- TODO: Add predicate version of Order that can support multiply tokens types like on wyvern protocol.
+- TODO: Extend this solution with AAM version for assets.
+- TODO: Extend this solution with homomorphic encryption.
 - TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
