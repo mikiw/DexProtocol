@@ -25,7 +25,7 @@ Today we can build trustless decentralized exchanges (DEX) that are fully transp
 ## CEX vs DEX problems and solutions
 Decentralized exchanges based on old concepts like order books with only on-chain processing can't be efficient today. This can lead to a problem when a 1$ order can trigger a waterfall of gas costly orders worth 100$, which makes no sense. This is why we should move the matching algorithm off-chain and incentivize these 3rd party services somehow, maybe with a fee. With this approach on-chain logic contains only the swapping assets part of the overall exchange logic
 
-We can also use a completely new way of automatic trading of digital assets which is automated market maker (AMM). An AMM is a way used to provide liquidity in decentralized finance (DeFi) which can replace a traditional concept of buyer and seller like in order book. Most common known protocol is Uniswap v3 (https://docs.uniswap.org/) but there is plenty of them.
+We can also use a completely new way of automatic trading of digital assets which is automated market maker (AMM). An AMM is a way used to provide liquidity in decentralized finance (DeFi) which can replace a traditional concept of buyer and seller like in order book. Most common known protocol is [Uniswap v3](https://docs.uniswap.org/) but there is plenty of them.
 
 It's a completely different way of creating a market of digital assets where prices of assets are determined by a constant mathematical formula (like XYK model). Now users are trading against the liquidity pool. Liquidity providers can be incentivized to add liquidity with part of the fee or with reward tokens. It sounds like a perfect way to get rich quickly, unfortunately, it's not because of phenomenon called impermanent loss.
 
@@ -167,8 +167,7 @@ When all exchange criteria are met:
 - Both orders are not in the `expired` state
 - Both entities have enough funds in `vault`
 
-We can perform an exchange of assets by executing `ExchangeAssets(callerTxId: string, takerTxId: string)` function by `maker` or `taker`. Now we will increase and decrease token balances of both entities in the vault.
-After that we will add `Trade` record in `Trades`, first id which is `callerTxId` will be a caller `txId` of `ExchangeAssets()` method, second will be a `takerTxId`. After that action both entities can withdraw tokens with `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)`.
+We can perform an exchange of assets by executing `ExchangeAssets(callerTxId: string, takerTxId: string)` function by `maker` or `taker`. Now we will increase and decrease token balances of both entities in the vault and set `isFilled` in orders for `true`. After that we will add `Trade` record in `Trades`, first id which is `callerTxId` will be a caller `txId` of `ExchangeAssets()` method, second will be a `takerTxId`. After that action both entities can withdraw tokens with `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)`.
 
 ```Typescript
 interface Trade {
@@ -254,6 +253,7 @@ export function handle (state, action) {
         const orderTxId = input.target
 
         // TODO: Implement required checks (find order by transaction id and check caller).
+        // TODO: Check if order is not filled.
         // TODO: If check will fail throw new ContractError.
         // TODO: Set isActive to true.
     }
@@ -262,6 +262,7 @@ export function handle (state, action) {
         const orderTxId = input.target
 
         // TODO: Implement required checks (find order by transaction id and check caller).
+        // TODO: Check if order is not filled.
         // TODO: If check will fail throw new ContractError.
         // TODO: Set isActive to false.
     }
@@ -294,7 +295,7 @@ export function handle (state, action) {
         // TODO: Check if entities have enough funds in vault.
         // TODO: Check if orders are complementary like 1A:10B and 10B:1A.
         // TODO: Change state of vault balances for both entities.
-        // TODO: Add record to Trades array.
+        // TODO: Add record to Trades array and set isFilled in orders.
     }
 
     throw new ContractError(`No function supplied or function not recognised: "${input.function}"`)
@@ -389,7 +390,6 @@ TODO:
 ```
 
 ## Others for future:
-- TODO: Better format links.
 - TODO: Write about off-chain matching algorithm.
 - TODO: Part 4 exchange scenario.
 - TODO: Add SDK v2 Syntax like [this](https://github.com/redstone-finance/smartweave-loot/blob/main/src/contracts/loot/contract.js).
