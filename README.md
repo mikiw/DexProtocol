@@ -65,25 +65,56 @@ It's mainly because of different requirements. We want to be able to store a var
 # SmartWeave SDK v2 Technical insight
 The purpose of that specification is to explain developers how to implement Wyvern like protocol on SmartWeave SDK v2.
 
+Our DEX contract state will store the following data:
+
+We will implement our DEX based on components listed below. They can be separate contracts or just state representation in one contract (further investigation is needed):
+- `Owner` of DEX set in initial state, this is required for whitelisting tokens by DAO
+- `Whitelist` of all possible ditial tokens assets that will be audited by DAO organization
+- `Registry` of orders that clients want to perform
+- `Vault` as a proxy between maker and taker while they performing asset exchange
+- `Trades` of all successfully performed trades, mainy for log proposuses like events in Ethereum
+
+Our initial state will look like this:
+```JSON
+{
+    "owner": "CONTRACT_CREATOR_ADDRESS",
+    "whitelist": [],
+    "registry": [],
+    "vault": [],
+    "trades": [],
+}
+```
+
+Ecosystem can also include:
+- Off-chain matching algorithm to inform entities about trade possibilities
+- Fronted with Arweave wallet integration to perform actions in our ecosystem
+
 ## Assets
 Although Arweave doesn't support ERC-20 like tokens we can assume that supported tokens must implement at least 
-`transfer` function.
+`transfer` and `balance` functions. We can assume that the implementation of that tokens will look like this https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js.
 
-TODO: write more about that!
+To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a whitelist. We will provide two methods `AddToWhitelist(address: string)` and `RemoveFromWhitelist(address: string)` for storing and removing whitelisted contract in the vault contract state.
 
-## Order type
+```Typescript
+interface Whitelist {
+    contracts: string[];
+}
+```
+
+## Order type and Registry
 To build decentralized exchange on SmartWeave smart contract protocol we need to specify our order schema.
 
 |Name|Type|Purpose|
 |----|-----|-------|
 |maker|string|Address of order maker.|
-|makerToken|string|Address of token to sell.|
-|makerTokenAmount|number|Amount of token to sell.|
-|takerToken|string|Address of token to buy.|
-|takerTokenAmount|number|Amount of token to buy.|
-|expires|number|Order expiration in Unix Timestamp format.|
+|makerToken|string|Address of token to exchange by order maker.|
+|makerTokenAmount|number|Amount of token to exchange by order maker.|
+|takerToken|string|Address of token to exchange by taker.|
+|takerTokenAmount|number|Amount of token to exchange by taker.|
+|isActive|number|Order can be canceled in anytime by order maker.|
+|expires|number|Order expiration in Unix Timestamp format or block height (TODO: what is better?).|
 
-Since SmartWeave SDK V2 supports typescript we will use <code>interface</code> `interface` to define order structure:
+To define order structure we will use this `interface`:
 
 ```Typescript
 interface Order {
@@ -97,9 +128,7 @@ interface Order {
 }
 ```
 
-## Orders Registry
-
-Registry will be our on-chain contract that will store all valid orders. Any user will be able to read it and find matches in orders. Our clients will need to run a matching algorithm off-chain or use 3rd party services to find matching orders.
+`Registry` will be our on-chain state that will store all valid orders. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be whitelisted and isActive must be true. We will also need to implement two functions `RegisterOrder(order: Order)` and `CancelOrder(transactionId: string)` for contract interactions with `Registry`.
 
 ```Typescript
 interface Registry {
@@ -107,20 +136,31 @@ interface Registry {
 }
 ```
 
-TODO: this will look differently
-<code>RegisterOrder(IOrder order)</code> 
-<code>CancelOrder(IOrder order)</code>
+Any user will be able to read `Registry` to find matches in orders. Our clients will need to do it manually, run a matching algorithm off-chain or use 3rd party services to find matching orders.
+
+To read our registry we can use this code snippet:
+```Typescript
+const contractId = "CONTRACT_ID";
+
+// using SmartWeaveNodeFactory to quickly obtain fully configured, mem-cacheable SmartWeave instance
+// see custom-client-example.ts for a more detailed explanation of all the core modules of the SmartWeave instance.
+const smartweave = SmartWeaveNodeFactory.memCached(arweave);
+
+// connecting to a given contract
+const contract = smartweave.contract(contractId);
+const { state, validity } = await cxyzContract.readState();
+```
 
 ## Off-chain matching algorithm
 TODO: write about matching algorithm.
+TODO: what we need to do after match?
 
-It's recommended to use `SmartWeaveNodeFactory` to quickly obtain a fully configured, file-cacheable SmartWeave instance to read state of the contract that's held `orders` in the registry.
-
-## Vault 
+## Vault
 Vault will be our proxy contract for holding assets during an exchange.
 TODO: write more about that! How to Approve / Authenticate trade?
-
 TODO: this will look differently
+TODO: read token balance? https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/read-other-contract.js
+
 <code>DepositAsset()</code> 
 <code>WithdrawAsset()</code>
 <code>Approve()</code>
@@ -145,7 +185,20 @@ interface Trades {
 }
 ```
 
+```Typescript
+Contract.writeInteraction
+const token = smartweave.contract("TOKEN_1_CONTRACT_ADDRESS");
+
+const result = await token.writeInteraction<any>({
+    function: "transfer",
+    data: {
+        qty: 15100900,
+    },
+});
+```
+
 ## Useful links for Devs to read before implementing:
+- https://en.wikipedia.org/wiki/Design_by_contract
 - https://arweave.medium.com/introducing-smartweave-building-smart-contracts-with-arweave-1fc85cb3b632 introducing of SmartWeave
 - https://cedriking.medium.com/lets-buidl-smartweave-contracts-6353d22c4561 building on SmartWeave V1 part 1 
 - https://cedriking.medium.com/lets-buidl-smartweave-contracts-2-16c904a8692d  building on SmartWeave V1 part 2
@@ -158,7 +211,59 @@ interface Trades {
 - https://github.com/redstone-finance/redstone-smartcontracts/blob/main/docs/SMARTWEAVE_PROTOCOL.md SmartWeave Protocol
 - https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/read-other-contract.js Read operation example
 
+
+## Smart Contract code snippet
+This is code snippet based on this documentation:
+
+```Typescript
+
+export function handle (state, action) {
+    // state
+    const owner = state.owner
+    const whitelist = state.whitelist
+    const registry = state.registry
+    const vault = state.vault
+    const trades = state.trades
+    
+    // action
+    const input = action.input
+    const caller = action.caller
+
+    if (input.function === 'AddToWhitelist') {
+        const address = input.target
+
+        // TODO: implement required checks (add if not exists), if check will fail throw new ContractError
+        // TODO: add to address to whitelist
+    }
+
+    if (input.function === 'RemoveFromWhitelist') {
+        const address = input.target
+
+        // TODO: implement required checks (remove only if exists), if check will fail throw new ContractError
+        // TODO: remove address from  whitelist
+    }
+    
+    if (input.function === 'RegisterOrder') {
+        const order = input.target
+
+        // TODO: implement required checks (like expiration time (or block heigh) higher than the current time, 
+        // tokens need to be whitelisted and isActive must be true), if check will fail throw new ContractError
+        // TODO: add order to registry
+    }
+
+    if (input.function === 'CancelOrder') {
+        const transactionId = input.target
+
+        // TODO: implement required checks (find order by transaction id and set isActive to false), if check will fail throw new ContractError
+        // TODO: remove address from  whitelist
+    }
+
+    throw new ContractError(`No function supplied or function not recognised: "${input.function}"`)
+}
+```
+
 ## Others for future:
+- TODO: implement functions and tests
 - TODO: Add predicate version of Order that can support multiply tokens types like on wyvern protocol
 - TODO: Extend this solution with AAM version for assets
 - TODO: Extend this solution with homomorphic encryption
