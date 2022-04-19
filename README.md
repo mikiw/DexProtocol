@@ -208,22 +208,25 @@ export function handle (state, action) {
     if (input.function === 'AddToWhitelist') {
         const address = input.target
 
-        // TODO: Implement required checks (add if not exists and only by owner), if check will fail throw new ContractError.
+        // TODO: Implement required checks (add if not exists and only by owner).
+        // TODO: If check will fail throw new ContractError.
         // TODO: Add to token contract address to whitelist.
     }
 
     if (input.function === 'RemoveFromWhitelist') {
         const address = input.target
 
-        // TODO: Implement required checks (remove only if exists and only by owner), if check will fail throw new ContractError.
+        // TODO: Implement required checks (remove only if exists and only by owner).
+        // TODO: If check will fail throw new ContractError.
         // TODO: Remove token contract address from whitelist.
     }
     
     if (input.function === 'RegisterOrder') {
         const order = input.target
 
-        // TODO: Implement required checks (like expiration time (or block heigh) higher than the current time/block, 
-        // tokens need to be whitelisted, isActive must be true, isFilled must be false and txId needs to be unique).
+        // TODO: Implement required checks like expiration time or block heigh
+        // is higher than the current time/block, tokens need to be whitelisted,
+        // isActive must be true, isFilled must be false and txId needs to be unique.
         // TODO: If check will fail throw new ContractError.
         // TODO: Add order to registry.
     }
@@ -231,14 +234,16 @@ export function handle (state, action) {
     if (input.function === 'CancelOrder') {
         const orderTxId = input.target
 
-        // TODO: Implement required checks (find order by transaction id and check caller), if check will fail throw new ContractError.
+        // TODO: Implement required checks (find order by transaction id and check caller).
+        // TODO: If check will fail throw new ContractError.
         // TODO: Set isActive to false.
     }
 
     if (input.function === 'DepositAsset') {
         const txId = input.target
 
-        // TODO: Implement required checks (check if token contract is whitelisted from transaction details).
+        // TODO: Implement required checks for example check if token contract
+        // is whitelisted from transaction details.
         // TODO: Read transaction details from blockchain and check confirmation number.
         // TODO: If check will fail throw new ContractError.
         // TODO: Increase the vault balance of digital asset for a given caller.
@@ -249,7 +254,7 @@ export function handle (state, action) {
         const withdrawDetails = input.target
 
         // TODO: Implement required checks (check if token contract is whitelisted).
-        // TODO: check if caller has enough balance of that asset.
+        // TODO: Check if caller has enough balance of that asset.
         // TODO: If check will fail throw new ContractError.
         // TODO: Decrease the vault balance of digital asset for a given caller.
     }
