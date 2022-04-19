@@ -232,14 +232,14 @@ export function handle (state, action) {
     if (input.function === 'AddToWhitelist') {
         const address = input.target
 
-        // TODO: implement required checks (add if not exists), if check will fail throw new ContractError
+        // TODO: implement required checks (add if not exists and only by owner), if check will fail throw new ContractError
         // TODO: add to address to whitelist
     }
 
     if (input.function === 'RemoveFromWhitelist') {
         const address = input.target
 
-        // TODO: implement required checks (remove only if exists), if check will fail throw new ContractError
+        // TODO: implement required checks (remove only if exists and only by owner), if check will fail throw new ContractError
         // TODO: remove address from  whitelist
     }
     
@@ -292,12 +292,61 @@ state.balances[Y] = 1
 state.balances[Z] = 1
 ```
 
-### Part 2 token orders in registry
+### Part 2 token orders in registry and vault deposit
 ```Typescript
 Later actions:
-entity Y register order to exchange 10x token A for 2x token B
-entity Z register order to exchange 2xx token B for 10 token A
-we have a match!
+entity Y register order to exchange 10x token A for 1x token B
+entity Z register order to exchange 1xx token B for 10 token A
+off chain matching algorithm found a match!
+
+Y sends 10 token A to V contract so state of token A contract looks like this:
+state.balances[X] = 980
+state.balances[Y] = 0
+state.balances[Z] = 10
+state.balances[V] = 10
+
+Z sends 1 token B to V contract so state of token B contract looks like this:
+state.balances[X] = 98
+state.balances[Y] = 1
+state.balances[Z] = 0
+state.balances[V] = 1
+
+Later actions:
+entity Y register valut balance of token A
+entity Z register valut balance of token B
+```
+
+```Typescript
+Later actions for echange scenario:
+Vault state of V contract:
+state.vault[token A][Y] = 10
+state.vault[token B][Z] = 1
+```
+
+```Typescript
+Later actions for withdrawing scenario after performing withdraw action by both entities:
+
+Token A contract will look like this:
+state.balances[X] = 980
+state.balances[Y] = 10
+state.balances[Z] = 10
+state.balances[V] = 0
+
+Token B contract will look like this:
+state.balances[X] = 98
+state.balances[Y] = 1
+state.balances[Z] = 1
+state.balances[V] = 0
+
+Vault state of V contract:
+state.vault[token A][Y] = 0
+state.vault[token B][Z] = 0
+```
+
+
+### Part 4 echange scenario
+```Typescript
+
 ```
 
 ## Others for future:
