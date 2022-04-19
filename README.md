@@ -1,4 +1,4 @@
-# DEX, Wyvern Protocol, SmartWeave Concepts
+# DEX, Wyvern Protocol, SmartWeave Concepts Introduction
 This documentation is a first draft of building a decentralized exchange of digital assets and knowledge economy on Arweave/SmartWeave with similar concepts as Wyvern Protocol has on Ethereum.
 
 Firstly I'll explain the domain of digital asset exchanges, later I'll show the differences between Ethereum/Wyvern Protocol and Arweave/SmartWeave and finally I'll explain how to implement DEX using SmartWeave SDK v2.
@@ -30,8 +30,7 @@ We can also use a completely new way of automatic trading of digital assets whic
 It's a completely different way of creating a market of digital assets where prices of assets are determined by a constant mathematical formula (like XYK model). Now users are trading against the liquidity pool. Liquidity providers can be incentivized to add liquidity with part of the fee or with reward tokens. It sounds like a perfect way to get rich quickly, unfortunately, it's not because of phenomenon called impermanent loss.
 
 ## Wyvern Protocol
-
-Wyvern (https://wyvernprotocol.com/ https://github.com/wyvernprotocol/wyvern-v3/tree/master/contracts) is the most advanced decentralized exchange protocol designed to transfer Ethereum-based assets. Now you can exchange your Tokens, Assets, and CryptoKitties in a trustless way on Wyvern Exchange (https://exchange.projectwyvern.com/ [Currently not working]).
+[Wyvern](https://wyvernprotocol.com/) is the most advanced decentralized exchange protocol designed to transfer Ethereum-based assets. Now you can exchange your Tokens, Assets, and CryptoKitties in a trustless way on [Wyvern Exchange](https://exchange.projectwyvern.com/ "Currently not working").
 
 Currently, Wyvern supports:
 - ERC-20 Tokens
@@ -43,8 +42,8 @@ Currently, Wyvern supports:
 For now, it's enough but in the future new standards will be added according to Wyvern DAO. Also all predicates in Wyvern are arbitrary and they can be any asset or combination of assets. Just try to swap AAPL and GOOGL from Nasdaq for VISA on NYSE, good luck with that!
 
 So how it works?
-
-Firstly users create orders with an order scheme (https://wyvernprotocol.com/docs#order-schema) and put them in the exchange registry and wait for a match and if so how much to fill it. Matching calldata can be constructed off-chain. Later, the first call is executed by the maker of the order through their proxy contract. The second call is executed by the counterparty.
+s
+Firstly users create orders with an order scheme [order scheme](https://wyvernprotocol.com/docs#order-schema) and put them in the exchange registry and wait for a match and if so how much to fill it. Matching calldata can be constructed off-chain. Later, the first call is executed by the maker of the order through their proxy contract. The second call is executed by the counterparty.
 
 Orders must always be authorized by the maker address, who owns the proxy contract which will perform the call. Authorization can be done in three ways: by signed message, by pre-approval, and by match-time approval. To optimize this process we can use the order book off-chain and if there is a match we can emit on-chain authorization.
 
@@ -55,21 +54,23 @@ Wyvern documentation also mentions a special case with Ethereum which can only b
 The creators of the protocol don't mention too much about the matching algorithms and who will pay for its execution. We can only assume that sooner or later some application will be created to do so and people will run it locally to find a match for the orders. Also, maybe 3rd party paid services will be created to do so because they need to be incentivized somehow from a game theory perspective since they have no interest in doing it for free (or maybe it will be some charity project).
 
 ## SmartWeave
-Although Wyvern on Ethereum seems to be a really interesting protocol to exchange ERC tokens like CryptoKitties but unfortunately it's very limited for building a highly scalable knowledge economy platform with homomorphic encryption around big data stored as permaweb (https://arwiki.wiki/#/en/the-permaweb) or IPFS (https://ipfs2arweave.com/).
+Although Wyvern on Ethereum seems to be a really interesting protocol to exchange ERC tokens like CryptoKitties but unfortunately it's very limited for building a highly scalable knowledge economy platform with homomorphic encryption around big data stored as [permaweb](https://arwiki.wiki/#/en/the-permaweb) or [IPFS](https://ipfs2arweave.com/).
 
-It's mainly because of different requirements. We want to be able to store a variety of data with different sizes that only the owner has access to - not only standardized tokens (Wrapped AR can be used, more here https://medium.com/everfinance/what-is-wrapped-ar-c4b4375290b9). Later we want to match clients with data processors that will process this data in a secure way. Finally, we want to build an economy around that process. This is why Arweave/SmartWeave SDK v2 (https://smartweave.docs.redstone.finance/) with permaweb concepts seems to be a good fit to cover use cases like this:
+It's mainly because of different requirements. We want to be able to store a variety of data with different sizes that only the owner has access to - not only standardized tokens (Wrapped AR can be used, more [here](https://medium.com/everfinance/what-is-wrapped-ar-c4b4375290b9)). Later we want to match clients with data processors that will process this data in a secure way. Finally, we want to build an economy around that process. This is why [Arweave](https://www.arweave.org/)/[SmartWeave SDK v2](https://smartweave.docs.redstone.finance/) with permaweb concepts seems to be a good fit to cover use cases like this:
 - There are clients that want to calculate taxes in Canada with a pretty easy tax system, but they don't want to reveal how much they earn. There is a digitalized accounting company that is writing its own solution to calculate tax. The processor is processing encrypted data for clients for payment.
 - There is a data provider with satellite data and the provider just wants to monetize this data without revealing it publicly. There is an entity specialized in image processing of that homomorphic image encryption data that doesn't want to reveal its algorithm but it wants to just give output with a number of ships/crops/etc. Finally, there is a hedge fund that it's interested in processed data of cargo ships or crops in the current year.
 - There is a medical company or patient that wants to analyze medical data (like NGS DNA sequence) without revealing it. There is a biotech startup with an algorithm to do so that wants to monetize it. On our marketplace, buyers can meet the seller.
 
-# SmartWeave Technical insight
+# SmartWeave Technical Insight
 The purpose of that specification is to explain developers how to implement Wyvern like protocol on SmartWeave.
 
 We will implement our DEX based on components listed below. They can be separate contracts or just state representation in one contract:
 - `Owner` of DEX set in initial state, this is required for whitelisting tokens by DAO
 - `Whitelist` of all possible ditial tokens assets that will be audited by DAO organization
 - `Registry` of orders that entities want to perform
+- `Deposits` of confirmed tokens transfers
 - `Vault` as a proxy between maker and taker while they are performing asset exchange
+- `Trades` that were executed
 
 Our initial state will look like this:
 ```JSON
@@ -79,6 +80,7 @@ Our initial state will look like this:
     "registry": [],
     "deposits": [],
     "vault": [][],
+    "trades": [],
 }
 ```
 
@@ -88,7 +90,7 @@ Ecosystem can also include:
 
 ## Assets
 Although Arweave doesn't support ERC-20 like tokens we can assume that supported tokens must implement at least 
-`transfer` and `balance` functions. We can assume that the implementation of that tokens will look like this https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js.
+`transfer` and `balance` functions. We can assume that the implementation of that tokens will look like [this](https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js).
 
 To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a whitelist. We will provide two methods `AddToWhitelist(address: string)` and `RemoveFromWhitelist(address: string)` for storing and removing whitelisted contract in the vault contract state by vault contract owner (DAO). It's both a design and a security decision (We can also implement this DEX without DAO and whitelists if needed).
 
@@ -108,7 +110,8 @@ To build decentralized order book exchange on SmartWeave smart contract protocol
 |makerTokenAmount|number|Amount of token to exchange by order maker.|
 |takerToken|string|Address of token to exchange by taker.|
 |takerTokenAmount|number|Amount of token to exchange by taker.|
-|isActive|number|Order can be canceled in anytime by order maker.|
+|isActive|number|`True` or `False` on initialization. Order can be canceled in anytime by order maker.|
+|isFilled|number|Order that was filled and it's inactive now.|
 |expires|number|Order expiration in Unix Timestamp format or block height (TODO: what is better?).|
 |txId|string|Transaction hash identifier to distinguish orders with same data. We can't add new `Order` if given txId is already in the registry.|
 
@@ -123,11 +126,12 @@ interface Order {
     takerTokenAmount: number;
     isActive: boolean;
     isFilled: boolean;
+    expires: number;
     txId: string;
 }
 ```
 
-`Registry` will be our on-chain state that will store all valid orders. We will need to implement two functions `RegisterOrder(order: Order)` and `CancelOrder(txId: string)` for contract interactions with `Registry`. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be whitelisted, isActive must be true, isFilled must be false and two orders with the same txId can't exist. 
+`Registry` will be our on-chain state that will store all valid orders. We will need to implement function `RegisterOrder(order: Order)` to store order in `Registry`. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be whitelisted, isFilled must be false and two orders with the same txId can't exist. `ActivateOrder(orderTxId: string)` and `DeactivateOrder(orderTxId: string)` can be used to activate/deactivate order, keep in mind that you can't modify `isActive` anymore after order is filled.
 
 ```Typescript
 interface Registry {
@@ -161,6 +165,18 @@ If an entity will change its mind `WithdrawAsset(tokenAddress: string, walletAdd
 
 TODO: How to Approve / Authenticate / Exchange? Write more about that!
 Now our contract can TODO: write more:
+
+```Typescript
+interface Trade {
+    makerTxId: string;
+    takerTxId: string;
+}
+
+interface Trades {
+    trades: Trade[];
+}
+```
+
 ```Typescript
 Contract.writeInteraction
 const token = smartweave.contract("TOKEN_CONTRACT_ADDRESS");
@@ -173,34 +189,33 @@ const result = await token.writeInteraction<any>({
 });
 ```
 
-When the buyer meets the seller and both parties will authorize the transaction, successful trade can be executed in a decentralized trustless way. We can filter that filled orders using `isFilled` flag for log proposuses.
+When the buyer meets the seller and both parties will authorize the transaction, successful trade can be performed in a decentralized trustless way. We can filter that filled orders using `isFilled` flag or by `Trades` for log proposuses.
 
 ## Useful links for Devs to read before implementing:
-- https://en.wikipedia.org/wiki/Design_by_contract
-- https://arweave.medium.com/introducing-smartweave-building-smart-contracts-with-arweave-1fc85cb3b632 introducing of SmartWeave
-- https://cedriking.medium.com/lets-buidl-smartweave-contracts-6353d22c4561 building on SmartWeave V1 part 1 
-- https://cedriking.medium.com/lets-buidl-smartweave-contracts-2-16c904a8692d  building on SmartWeave V1 part 2
-- https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js example of token code for SmartWeave V1
-- https://smartweave.docs.redstone.finance/#smartweave-sdk-v2 SmartWeave V2 SDK documentation
-- https://github.com/redstone-finance/redstone-smartcontracts-examples code examples for SmartWeave V2 SDK
-- https://github.com/redstone-finance/redstone-smartcontracts [TODO]
-- https://github.com/redstone-finance/smartweave-loot/blob/main/docs/LOOT_CONTRACT_TUTORIAL.md Implementation tutorial for loot contract on SmartWeave
-- https://github.com/ArweaveTeam/SmartWeave/blob/master/CONTRACT-GUIDE.md Contract Writing Guide
-- https://github.com/redstone-finance/redstone-smartcontracts/blob/main/docs/SMARTWEAVE_PROTOCOL.md SmartWeave Protocol
-- https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/read-other-contract.js Read operation example
+- [Software design by contract](https://en.wikipedia.org/wiki/Design_by_contract)
+- [Introducing of SmartWeave](https://arweave.medium.com/introducing-smartweave-building-smart-contracts-with-arweave-1fc85cb3b632)
+- [Building on SmartWeave v1 part #1](https://cedriking.medium.com/lets-buidl-smartweave-contracts-6353d22c4561)
+- [Building on SmartWeave v1 part #2](https://cedriking.medium.com/lets-buidl-smartweave-contracts-2-16c904a8692d)
+- [RedStone SmartContracts SDK](https://github.com/redstone-finance/redstone-smartcontracts)
+- [Contract Writing Guide](https://github.com/ArweaveTeam/SmartWeave/blob/master/CONTRACT-GUIDE.md)
+- [SmartWeave Protocol](https://github.com/redstone-finance/redstone-smartcontracts/blob/main/docs/SMARTWEAVE_PROTOCOL.md)
+- [SmartWeave v2 SDK documentation](https://smartweave.docs.redstone.finance/#smartweave-sdk-v2)
+- [Code examples for SmartWeave v2 SDK](https://github.com/redstone-finance/redstone-smartcontracts-examples)
+- [Implementation tutorial for loot contract on SmartWeave SDK v2](https://github.com/redstone-finance/smartweave-loot/blob/main/docs/LOOT_CONTRACT_TUTORIAL.md)
 
 ## Smart Contract code snippet
 This is code snippet based on this documentation:
 
 ```Typescript
-
 export function handle (state, action) {
     // state
     const owner = state.owner
     const whitelist = state.whitelist
     const registry = state.registry
+    const deposits = state.registry
     const vault = state.vault
-    
+    const trades = state.trades
+
     // action
     const input = action.input
     const caller = action.caller
@@ -230,8 +245,16 @@ export function handle (state, action) {
         // TODO: If check will fail throw new ContractError.
         // TODO: Add order to registry.
     }
+    
+    if (input.function === 'ActivateOrder') {
+        const orderTxId = input.target
 
-    if (input.function === 'CancelOrder') {
+        // TODO: Implement required checks (find order by transaction id and check caller).
+        // TODO: If check will fail throw new ContractError.
+        // TODO: Set isActive to true.
+    }
+
+    if (input.function === 'DeactivateOrder') {
         const orderTxId = input.target
 
         // TODO: Implement required checks (find order by transaction id and check caller).
@@ -297,7 +320,7 @@ state.balances[Z] = 1
 ```Typescript
 Later actions:
 entity Y register order to exchange 10x token A for 1x token B
-entity Z register order to exchange 1xx token B for 10 token A
+entity Z register order to exchange 1x token B for 10 token A
 off chain matching algorithm found a match!
 
 Y sends 10 token A to V contract so state of token A contract looks like this:
@@ -313,8 +336,8 @@ state.balances[Z] = 0
 state.balances[V] = 1
 
 Later actions:
-entity Y register valut deposit balance of token A (DepositAsset())
-entity Z register valut deposit balance of token B (DepositAsset())
+entity Y register valut deposit balance of token A (DepositAsset(arweaveTxId: string))
+entity Z register valut deposit balance of token B (DepositAsset(arweaveTxId: string))
 ```
 
 ```Typescript
@@ -325,7 +348,8 @@ state.vault[token B][Z] = 1
 ```
 
 ```Typescript
-Later actions for withdrawing scenario after performing withdraw action by both entities wtih WithdrawAsset():
+Later actions for withdrawing scenario after performing withdraw action by both 
+entities wtih WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number):
 
 Token A contract will look like this:
 state.balances[X] = 980
@@ -350,11 +374,15 @@ state.vault[token B][Z] = 0
 ```
 
 ## Others for future:
+- TODO: Better format links.
 - TODO: Implement functions and tests.
-- TODO: Add more information about gas fees.
+- TODO: Add SDK v2 Syntax like [this](https://github.com/redstone-finance/smartweave-loot/blob/main/src/contracts/loot/contract.js).
+- TODO: Decide if the whitelist should have an active flag or just add/delete in the array.
+- TODO: Add more information about gas fees and who will pay for what.
+- TODO: Add possibility to trade AR for tokens.
 - TODO: Research possibility of a SmartWeave/Ethereum bridge.
 - TODO: Research safe math in SmartWeave (buffer overflow scenarios etc.).
 - TODO: Add predicate version of Order that can support multiply tokens types like on wyvern protocol.
 - TODO: Extend this solution with AAM version for assets.
 - TODO: Extend this solution with homomorphic encryption.
-- TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe Dexter (https://dexter-manual.readthedocs.io/en/latest/)?
+- TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe [Dexter](https://dexter-manual.readthedocs.io/en/latest/)?
