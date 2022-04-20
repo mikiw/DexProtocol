@@ -386,14 +386,30 @@ state.vault[token B][Z] = 0
 
 ### Part 4 exchange scenario
 ```Typescript
-TODO:
+
+Vault state of V contract after exchange:
+state.vault[token B][Y] = 1
+state.vault[token A][Z] = 10
+
+Later state of tokens after withdraw of both entities:
+
+Token A contract will look like this:
+state.balances[X] = 980
+state.balances[Y] = 0
+state.balances[Z] = 20
+state.balances[V] = 10
+
+Token B contract will look like this:
+state.balances[X] = 98
+state.balances[Y] = 2
+state.balances[Z] = 0
+state.balances[V] = 1
 ```
 
 ## Others for future:
 - TODO: Write about off-chain matching algorithm.
-- TODO: Part 4 exchange scenario.
 - TODO: Add SDK v2 Syntax like [this](https://github.com/redstone-finance/smartweave-loot/blob/main/src/contracts/loot/contract.js).
-- TODO: Decide if the whitelist should have an active flag or just add/delete in the array.
+- TODO: Investigate if the data structure is ok in that scenario since there is no events and filters like in Ethereum. Should we store all data and soft delete or delete from the state itself? Decide if the whitelist should have an active flag or just add/delete in the array...
 
 - TODO: Implement functions and tests.
 - TODO: Add more information about gas fees and who will pay for what.
