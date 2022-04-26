@@ -65,8 +65,8 @@ It's mainly because of different requirements. We want to be able to store a var
 The purpose of that specification is to explain developers how to implement Wyvern like protocol on SmartWeave.
 
 We will implement our DEX based on components listed below. They can be separate contracts or just state representation in one contract:
-- `Owner` of DEX set in initial state, this is required for whitelisting tokens by DAO
-- `Whitelist` of all possible ditial tokens assets that will be audited by DAO organization
+- `Owner` of DEX set in initial state, this is required for `Allowlist` tokens by DAO
+- `Allowlist` of all possible ditial tokens assets that will be audited by DAO organization
 - `Registry` of orders that entities want to perform
 - `Deposits` of confirmed tokens transfers
 - `Vault` as a proxy between maker and taker while they are performing asset exchange
@@ -76,7 +76,7 @@ Our initial state will look like this:
 ```JSON
 {
     "owner": "CONTRACT_CREATOR_ADDRESS",
-    "whitelist": [],
+    "allowlist": [],
     "registry": [],
     "deposits": [],
     "vault": [][],
@@ -92,10 +92,10 @@ Ecosystem can also include:
 Although Arweave doesn't support ERC-20 like tokens we can assume that supported tokens must implement at least 
 `transfer` and `balance` functions. We can assume that the implementation of that tokens will look like [this](https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js).
 
-To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a whitelist. We will provide two methods `AddToWhitelist(address: string)` and `RemoveFromWhitelist(address: string)` for storing and removing whitelisted contract in the vault contract state by vault contract owner (DAO). It's both a design and a security decision (We can also implement this DEX without DAO and whitelists if needed).
+To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a allowlist. We will provide two methods `AddToAllowlist(address: string)` and `RemoveFromAllowlist(address: string)` for storing and removing from allowlist contract in the vault contract state by vault contract owner (DAO). It's both a design and a security decision (We can also implement this DEX without DAO and allowlist if needed).
 
 ```Typescript
-interface Whitelist {
+interface Allowlist {
     contracts: string[];
 }
 ```
@@ -112,7 +112,7 @@ To build decentralized order book exchange on SmartWeave smart contract protocol
 |takerTokenAmount|number|Amount of token to exchange by taker.|
 |isActive|number|`True` or `False` on initialization. Order can be canceled in anytime by order maker.|
 |isFilled|number|Order that was filled and it's inactive now.|
-|expires|number|Order expiration in Unix Timestamp format or block height (TODO: what is better?).|
+|expires|number|Order expiration in Unix Timestamp format (block.timestamp property).|
 |txId|string|Transaction hash identifier to distinguish orders with same data. We can't add new `Order` if given txId is already in the registry.|
 
 To define order structure we will use this `interface`:
@@ -131,7 +131,7 @@ interface Order {
 }
 ```
 
-`Registry` will be our on-chain state that will store all valid orders. We will need to implement function `RegisterOrder(order: Order)` to store order in `Registry`. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be whitelisted, isFilled must be false and two orders with the same txId can't exist. `ActivateOrder(orderTxId: string)` and `DeactivateOrder(orderTxId: string)` can be used to activate/deactivate order, keep in mind that you can't modify `isActive` anymore after order is filled.
+`Registry` will be our on-chain state that will store all valid orders. We will need to implement function `RegisterOrder(order: Order)` to store order in `Registry`. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be on whitelist, isFilled must be false and two orders with the same txId can't exist. `ActivateOrder(orderTxId: string)` and `DeactivateOrder(orderTxId: string)` can be used to activate/deactivate order, keep in mind that you can't modify `isActive` anymore after order is filled.
 
 ```Typescript
 interface Registry {
@@ -158,9 +158,9 @@ const { state, validity } = await cxyzContract.readState();
 TODO: Write about off-chain matching algorithm.
 
 ## Vault
-Vault will be our proxy for holding assets during an exchange. Firstly entity needs to send tokens to a contract vault, later it can perform a `DepositAsset(arweaveTxId: string)` function to increase its vault balance based on transaction Id. Our vault contract function will read transaction details and will add the balance of a specific token if it's whitelisted. After that, we will register that this deposit was already processed in `state.deposits` by adding there arweaveTxId. We can't prevent sending to vault address tokens that are not whitelisted so tokens like this will be lost forever and its design decision. We also need to agree on the number of confirmations that are needed to trust transaction.
+Vault will be our proxy for holding assets during an exchange. Firstly entity needs to send tokens to a contract vault, later it can perform a `DepositAsset(arweaveTxId: string)` function to increase its vault balance based on transaction Id. Our vault contract function will read transaction details and will add the balance of a specific token if it's on allowlist. After that, we will register that this deposit was already processed in `state.deposits` by adding there arweaveTxId. We can't prevent sending to vault address tokens that are not on allowlist so tokens like this will be lost forever and its design decision. We also need to agree on the number of confirmations that are needed to trust transaction.
 
-If an entity will change its mind `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)` function can be called and the vault contract will decrease the balance of that token and will transfer it to the indicated wallet address with `Contract.writeInteraction` function. Implementation will need to perform multiple checks for example if the caller can withdraw the balance or if tokens are still on the whitelist. In rare cases, token contracts can be delisted for security reasons, in that case, we will need to wait for them to be whitelisted again, or ask DAO to handle that exception because we don't want to load malicious smart contracts into our contract memory during execution.
+If an entity will change its mind `WithdrawAsset(tokenAddress: string, walletAddress: string, amount: number)` function can be called and the vault contract will decrease the balance of that token and will transfer it to the indicated wallet address with `Contract.writeInteraction` function. This feature requires cross-contract calls, more about implementation can be found [here](https://github.com/redstone-finance/redstone-smartcontracts/tree/main/src/__tests__/integration/internal-writes). Implementation will need to perform multiple checks for example if the caller can withdraw the balance or if tokens are still on the allowlist. In rare cases, token contracts can be delisted for security reasons, in that case, we will need to wait for them to be on allowlist again, or ask DAO to handle that exception because we don't want to load malicious smart contracts into our contract memory during execution (this approach is recommended by SmartWeave team).
 
 When all exchange criteria are met:
 - Both orders are `active` and not `filled`
@@ -210,95 +210,114 @@ When the buyer meets the seller and both parties will authorize the transaction,
 This is code snippet based on this documentation:
 
 ```Typescript
-export function handle (state, action) {
+export async function handle(state, action) {
+
     // state
     const owner = state.owner
-    const whitelist = state.whitelist
+    const allowlist = state.allowlist
     const registry = state.registry
     const deposits = state.registry
     const vault = state.vault
     const trades = state.trades
 
-    // action
-    const input = action.input
-    const caller = action.caller
+    switch (action.input.function) {
 
-    if (input.function === 'AddToWhitelist') {
-        const address = input.target
+        case "AddToAllowlist": {
+            const address = action.input.target
 
-        // TODO: Implement required checks (add if not exists and only by owner).
-        // TODO: If check will fail throw new ContractError.
-        // TODO: Add to token contract address to whitelist.
-    }
+            // TODO: Implement required checks (add if not exists and only by owner).
+            // TODO: If check will fail throw new ContractError.
+            // TODO: Add to token contract address to allowlist.
 
-    if (input.function === 'RemoveFromWhitelist') {
-        const address = input.target
+            return { state };
+        }
 
-        // TODO: Implement required checks (remove only if exists and only by owner).
-        // TODO: If check will fail throw new ContractError.
-        // TODO: Remove token contract address from whitelist.
-    }
-    
-    if (input.function === 'RegisterOrder') {
-        const order = input.target
+        case "RemoveFromAllowlist": {
+            const address = action.input.target
 
-        // TODO: Implement required checks like expiration time or block heigh
-        // is higher than the current time/block, tokens need to be whitelisted,
-        // isActive must be true, isFilled must be false and txId needs to be unique.
-        // TODO: If check will fail throw new ContractError.
-        // TODO: Add order to registry.
-    }
-    
-    if (input.function === 'ActivateOrder') {
-        const orderTxId = input.target
+            // TODO: Implement required checks (remove only if exists and only by owner).
+            // TODO: If check will fail throw new ContractError.
+            // TODO: Remove token contract address from allowlist.
 
-        // TODO: Implement required checks (find order by transaction id and check caller).
-        // TODO: Check if order is not filled.
-        // TODO: If check will fail throw new ContractError.
-        // TODO: Set isActive to true.
-    }
+            return { state };
+        }
 
-    if (input.function === 'DeactivateOrder') {
-        const orderTxId = input.target
+        case "RegisterOrder": {
+            const order = action.input.target
 
-        // TODO: Implement required checks (find order by transaction id and check caller).
-        // TODO: Check if order is not filled.
-        // TODO: If check will fail throw new ContractError.
-        // TODO: Set isActive to false.
-    }
+            // TODO: Implement required checks like expiration time is higher than the current time
+            // tokens need to be on allowlist,
+            // isActive must be true, isFilled must be false and txId needs to be unique.
+            // TODO: If check will fail throw new ContractError.
+            // TODO: Add order to registry.
 
-    if (input.function === 'DepositAsset') {
-        const txId = input.target
+            return { state };
+        }
 
-        // TODO: Implement required checks for example check if token contract
-        // is whitelisted from transaction details.
-        // TODO: Read transaction details from blockchain and check confirmation number.
-        // TODO: If check will fail throw new ContractError.
-        // TODO: Increase the vault balance of digital asset for a given caller.
-        // TODO: Update asset deposit registry with txId to avoid double deposit.
-    }
-    
-    if (input.function === 'WithdrawAsset') {
-        const withdrawDetails = input.target
+        case "ActivateOrder": {
+            const orderTxId = action.input.target
 
-        // TODO: Implement required checks (check if token contract is whitelisted).
-        // TODO: Check if caller has enough balance of that asset.
-        // TODO: If check will fail throw new ContractError.
-        // TODO: Decrease the vault balance of digital asset for a given caller.
-    }
+            // TODO: Implement required checks (find order by transaction id and check action.caller).
+            // TODO: Check if order is not filled.
+            // TODO: If check will fail throw new ContractError.
+            // TODO: Set isActive to true.
 
-    if (input.function === 'ExchangeAssets') {
-        const todo = input.target
+            return { state };
+        }
 
-        // TODO: Implement required checks for example check if orders are active
-        // and not filled. Check if both orders are not in the expired state.
-        // TODO: Check if entities have enough funds in vault.
-        // TODO: Check if orders are complementary like 1A:10B and 10B:1A.
-        // TODO: Change state of vault balances for both entities.
-        // TODO: Add record to Trades array and set isFilled in orders.
-    }
+        case "DeactivateOrder": {
+            const orderTxId = action.input.target
 
-    throw new ContractError(`No function supplied or function not recognised: "${input.function}"`)
+            // TODO: Implement required checks (find order by transaction id and check action.caller).
+            // TODO: Check if order is not filled.
+            // TODO: If check will fail throw new ContractError.
+            // TODO: Set isActive to false.
+
+            return { state };
+        }
+
+        case "DepositAsset": {
+            const txId = action.input.target
+
+            // TODO: Implement required checks for example check if token contract
+            // is on allowlist from transaction details.
+            // TODO: Read transaction details from blockchain and check confirmation number.
+            // TODO: If check will fail throw new ContractError.
+            // TODO: Increase the vault balance of digital asset for a given action.caller.
+            // TODO: Update asset deposit registry with txId to avoid double deposit.
+
+            return { state };
+        }
+
+        case "WithdrawAsset": {
+            const withdrawDetails = action.input.target
+
+            // TODO: Implement required checks (check if token contract is on allowlist).
+            // TODO: Check if action.caller has enough balance of that asset.
+            // TODO: If check will fail throw new ContractError.
+            // TODO: Decrease the vault balance of digital asset for a given action.caller.
+
+            return { state };
+        }
+
+        case "ExchangeAssets": {
+            const exchange = action.input.target
+
+            // TODO: Implement required checks for example check if orders are active
+            // and not filled. Check if both orders are not in the expired state.
+            // TODO: Check if entities have enough funds in vault.
+            // TODO: Check if orders are complementary like 1A:10B and 10B:1A.
+            // TODO: Change state of vault balances for both entities.
+            // TODO: Add record to Trades array and set isFilled in orders.
+
+            return { state };
+        }
+
+        default: {
+            throw new ContractError(
+            `Unsupported contract function: ${functionName}`);
+        }
+  }
 }
 ```
 
@@ -408,8 +427,8 @@ state.balances[V] = 1
 
 ## Others for future:
 - TODO: Write about off-chain matching algorithm.
-- TODO: Add SDK v2 Syntax like [this](https://github.com/redstone-finance/smartweave-loot/blob/main/src/contracts/loot/contract.js).
-- TODO: Investigate if the data structure is ok in that scenario since there is no events and filters like in Ethereum. Should we store all data and soft delete or delete from the state itself? Decide if the whitelist should have an active flag or just add/delete in the array...
+
+- TODO: Investigate if the data structure is ok in that scenario since there is no events and filters like in Ethereum. Should we store all data and soft delete or delete from the state itself? Decide if the allowlist should have an active flag or just add/delete in the array...
 
 - TODO: Implement functions and tests.
 - TODO: Add more information about gas fees and who will pay for what.
