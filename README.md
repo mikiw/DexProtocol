@@ -155,7 +155,7 @@ const { state, validity } = await cxyzContract.readState();
 ```
 
 ## Off-chain matching algorithm
-TODO: Write about off-chain matching algorithm.
+Off-chain matching algorithm is not the main purpose of that specification but I advise to check [Machine Learning for Trading](https://www.udacity.com/course/machine-learning-for-trading--ud501) to understand how matching algorithms work especially on [this video](https://www.youtube.com/watch?v=lEBiyNojTqY).
 
 ## Vault
 Vault will be our proxy for holding assets during an exchange. Firstly entity needs to send tokens to a contract vault, later it can perform a `DepositAsset(arweaveTxId: string)` function to increase its vault balance based on transaction Id. Our vault contract function will read transaction details and will add the balance of a specific token if it's on allowlist. After that, we will register that this deposit was already processed in `state.deposits` by adding there arweaveTxId. We can't prevent sending to vault address tokens that are not on allowlist so tokens like this will be lost forever and its design decision. We also need to agree on the number of confirmations that are needed to trust transaction.
@@ -426,7 +426,6 @@ state.balances[V] = 1
 ```
 
 ## Others for future:
-- TODO: Write about off-chain matching algorithm.
 - TODO: Implement functions and tests.
 - TODO: Since SmartWeave smart contract system doesn't provide events and efficient filtering like in Ethereum, we need to run performance tests for high numbers od data like orders allowlist/registry/deposits/vault/trades and test if flags and soft delete is efficient enough.
 - TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe [Dexter](https://dexter-manual.readthedocs.io/en/latest/)?
