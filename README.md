@@ -92,7 +92,7 @@ Ecosystem can also include:
 Although Arweave doesn't support ERC-20 like tokens we can assume that supported tokens must implement at least 
 `transfer` and `balance` functions. We can assume that the implementation of that tokens will look like [this](https://github.com/ArweaveTeam/SmartWeave/blob/master/examples/token.js).
 
-To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a allowlist. We will provide two methods `AddToAllowlist(address: string)` and `RemoveFromAllowlist(address: string)` for storing and removing from allowlist contract in the vault contract state by vault contract owner (DAO). It's both a design and a security decision (We can also implement this DEX without DAO and allowlist if needed).
+To execute these contracts functions in order to perform transfers from our vault contract we will need to audit them by the DAO organization and create a allowlist. We will provide two methods `AddToAllowlist(address: string)` and `RemoveFromAllowlist(address: string)` for storing and removing from `allowlist` contract in the vault contract state by vault contract owner (DAO). It's both a design and a security decision (We can also implement this DEX without DAO and `allowlist` if needed).
 
 ```Typescript
 interface Allowlist {
@@ -131,7 +131,7 @@ interface Order {
 }
 ```
 
-`Registry` will be our on-chain state that will store all valid orders. We will need to implement function `RegisterOrder(order: Order)` to store order in `Registry`. Orders need to meet all requirements before adding like expiration time (or block heigh) higher than the current time, tokens need to be on whitelist, isFilled must be false and two orders with the same txId can't exist. `ActivateOrder(orderTxId: string)` and `DeactivateOrder(orderTxId: string)` can be used to activate/deactivate order, keep in mind that you can't modify `isActive` anymore after order is filled.
+`Registry` will be our on-chain state that will store all valid orders. We will need to implement function `RegisterOrder(order: Order)` to store order in `Registry`. Orders need to meet all requirements before adding like expiration time higher than the current time, tokens need to be on `allowlist`, `isFilled` must be false and two orders with the same `txId` can't exist. `ActivateOrder(orderTxId: string)` and `DeactivateOrder(orderTxId: string)` can be used to activate/deactivate order, keep in mind that you can't modify `isActive` anymore after order is filled.
 
 ```Typescript
 interface Registry {
@@ -427,10 +427,9 @@ state.balances[V] = 1
 
 ## Others for future:
 - TODO: Write about off-chain matching algorithm.
-
-- TODO: Investigate if the data structure is ok in that scenario since there is no events and filters like in Ethereum. Should we store all data and soft delete or delete from the state itself? Decide if the allowlist should have an active flag or just add/delete in the array...
-
 - TODO: Implement functions and tests.
+- TODO: Since SmartWeave smart contract system doesn't provide events and efficient filtering like in Ethereum, we need to run performance tests for high numbers od data like orders allowlist/registry/deposits/vault/trades and test if flags and soft delete is efficient enough.
+- TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe [Dexter](https://dexter-manual.readthedocs.io/en/latest/)?
 - TODO: Add more information about gas fees and who will pay for what.
 - TODO: Add possibility to trade AR for tokens.
 - TODO: Research possibility of a SmartWeave/Ethereum bridge.
@@ -438,4 +437,3 @@ state.balances[V] = 1
 - TODO: Add predicate version of Order that can support multiply tokens types like on wyvern protocol.
 - TODO: Extend this solution with AAM version for assets.
 - TODO: Extend this solution with homomorphic encryption.
-- TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe [Dexter](https://dexter-manual.readthedocs.io/en/latest/)?
