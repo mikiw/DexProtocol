@@ -246,8 +246,7 @@ export async function handle(state, action) {
             const order = action.input.target
 
             // TODO: Implement required checks like expiration time is higher than the current time
-            // tokens need to be on allowlist,
-            // isActive must be true, isFilled must be false and txId needs to be unique.
+            // tokens need to be on allowlist, isFilled must be false and txId needs to be unique.
             // TODO: If check will fail throw new ContractError.
             // TODO: Add order to registry.
 
@@ -416,19 +415,19 @@ Token A contract will look like this:
 state.balances[X] = 980
 state.balances[Y] = 0
 state.balances[Z] = 20
-state.balances[V] = 10
+state.balances[V] = 0
 
 Token B contract will look like this:
 state.balances[X] = 98
 state.balances[Y] = 2
 state.balances[Z] = 0
-state.balances[V] = 1
+state.balances[V] = 0
 ```
 
 ## Others for future:
-- TODO: Implement functions and tests.
-- TODO: Since SmartWeave smart contract system doesn't provide events and efficient filtering like in Ethereum, we need to run performance tests for high numbers od data like orders allowlist/registry/deposits/vault/trades and test if flags and soft delete is efficient enough.
-- TODO: How to simulate these custom made blockchain/exchanges/markets behaviors before launch? For example in Anylogic? Maybe [Dexter](https://dexter-manual.readthedocs.io/en/latest/)?
+- TODO: Implement smart contract functions and tests it.
+- TODO: Since SmartWeave smart contract system doesn't provide events and efficient filtering like in Ethereum, we need to run performance tests for high numbers of data like orders allowlist/registry/deposits/vault/trades and test if flags and soft delete is efficient enough.
+- TODO: How to simulate these custom made exchanges/markets behaviors before launch? For example in Anylogic? Maybe [Dexter](https://dexter-manual.readthedocs.io/en/latest/)?
 - TODO: Add more information about gas fees and who will pay for what.
 - TODO: Add possibility to trade AR for tokens.
 - TODO: Research possibility of a SmartWeave/Ethereum bridge.
